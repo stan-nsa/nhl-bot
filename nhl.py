@@ -193,4 +193,4 @@ def get_game_team_score(game_team_score, emoji=True):
     return game_team_score
 
 
-#print(get_schedule_today())
+print(get_schedule_today())
