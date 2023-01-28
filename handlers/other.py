@@ -12,7 +12,7 @@ async def command_start(message: types.Message):
                         "/standings - Турнирная таблица\n"
                         "/stats - Статистика\n"
                         #"/today - расписание матчей на сегодня\n"
-                        #"/yesterday - Расписание матчей на вчера\n"
+                        #"/yesterday - Расписание матчей за вчера\n"
                         #"/tomorrow - Расписание матчей на завтра\n"
                         "\n"
                         "Сделай индивидуальные настройки:\n"
