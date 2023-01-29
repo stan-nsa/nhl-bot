@@ -5,6 +5,17 @@
 
 # All players: https://records.nhl.com/site/api/player/
 
+# Goalie:
+#https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023
+#https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023&sort=wins&direction=DESC
+#https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023&sort=goalsAgainstAverage&direction=ASC
+#https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023&sort=gamesPlayed&direction=DESC
+
+# Skater:
+#https://records.nhl.com/site/api/skater-playoff-scoring?cayenneExp=seasonId=20212022&sort=points&direction=DESC
+#https://records.nhl.com/site/api/skater-playoff-scoring?cayenneExp=seasonId=20212022&sort=goals&direction=DESC
+#https://records.nhl.com/site/api/skater-playoff-scoring?cayenneExp=seasonId=20212022&sort=gamesPlayed&direction=DESC
+
 
 import requests
 #from datetime import datetime, timezone, date, timedelta
