@@ -11,8 +11,39 @@ tzEST = pytz.timezone("US/Eastern")
 tzMSK = pytz.timezone("Europe/Moscow")
 tzVLAT = pytz.timezone("Asia/Vladivostok")
 
+# Дата для инлайн кнопок
+CurrentDate = ''
+
 
 #== Получение от сервера данных расписания ========================================================
+
+# Получение от сервера данных расписания для инлайн-меню
+def get_schedule_dates_for_inlinemenu():
+
+    dates = {'today': '', 'previous': '', 'next': ''}
+
+    schedule_str = "/schedule"
+
+    data = nhl.get_request_nhl_api(schedule_str)
+
+    dates['today'] = date.fromisoformat(data['dates'][0]['date']) if (data['totalItems'] > 0) else \
+                     datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(tzEST)
+
+    dates['previous'] = dates['today'] + timedelta(days=-1)
+    data = nhl.get_request_nhl_api(schedule_str + f"?startDate={(dates['previous'] + timedelta(days=-10)).strftime('%Y-%m-%d')}&endDate={dates['previous'].strftime('%Y-%m-%d')}")
+    dates['previous'] = data['dates'][len(data['dates']) - 1]['date']
+
+
+    dates['next'] = dates['today'] + timedelta(days=+1)
+    data = nhl.get_request_nhl_api(schedule_str + f"?startDate={dates['next'].strftime('%Y-%m-%d')}&endDate={(dates['next'] + timedelta(days=+10)).strftime('%Y-%m-%d')}")
+    dates['next'] = data['dates'][0]['date']
+
+    dates['today'] = dates['today'].strftime('%Y-%m-%d')
+    #dates['previous'] = dates['previous'].strftime('%Y-%m-%d')
+    #dates['next'] = dates['next'].strftime('%Y-%m-%d')
+
+    return dates
+
 
 # Получение от сервера данных расписания на сегодня
 def get_schedule_today():
@@ -157,8 +188,8 @@ def get_scores():
 
 
 # Формирование теста для вывода текущих результатов матчей
-def get_scores_text():
-    data = get_scores()
+def get_scores_text(data=None):
+    data = get_scores() if (data==None) else data
 
     txt = get_schedule_days_text(data)
 

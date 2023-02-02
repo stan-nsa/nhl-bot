@@ -2,6 +2,9 @@ from aiogram import types, Dispatcher
 from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/
 from create_bot import dp
 
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+
 from nhl import schedule
 
 async def command_scores(message: types.Message):
@@ -9,7 +12,11 @@ async def command_scores(message: types.Message):
 
 
 async def command_schedule(message: types.Message):
-    await message.reply(f"{emojize(':calendar:')} <b>Расписание матчей:</b>\n{schedule.get_schedule_today_text()}", parse_mode="HTML")
+    dates = schedule.get_schedule_dates_for_inlinemenu()
+    await message.reply(f"{emojize(':calendar:')} <b>Расписание матчей:</b>\n{schedule.get_scores_text()}", parse_mode="HTML",
+                        reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton(f"{dates['previous']}<", callback_data='Date-Prev'),
+                                                                InlineKeyboardButton(f"{dates['today']}", callback_data='Date'),
+                                                                InlineKeyboardButton(f">{dates['next']}", callback_data='Date-Next')))
 
 
 async def command_schedule_today(message: types.Message):
