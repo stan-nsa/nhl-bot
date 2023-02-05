@@ -18,50 +18,49 @@ CurrentDate = ''
 #== Получение от сервера данных расписания ========================================================
 
 # Получение от сервера данных расписания для инлайн-меню
-def get_schedule_dates_for_inlinemenu():
+def get_schedule_dates_for_inlinemenu(day=None):
 
-    dates = {'today': '', 'previous': '', 'next': ''}
+    dates = {'day': '', 'previous': '', 'next': ''}
+    days_delta = 10
 
     schedule_str = "/schedule"
 
-    data = nhl.get_request_nhl_api(schedule_str)
+    if (day == None):
+        data = nhl.get_request_nhl_api(schedule_str)
 
-    dates['today'] = date.fromisoformat(data['dates'][0]['date']) if (data['totalItems'] > 0) else \
-                     datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(tzEST)
+        dates['day'] = date.fromisoformat(data['dates'][0]['date']) if (data['totalItems'] > 0) else \
+                       datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(tzEST)
+    else:
+        dates['day'] = date.fromisoformat(day)
 
-    dates['previous'] = dates['today'] + timedelta(days=-1)
-    data = nhl.get_request_nhl_api(schedule_str + f"?startDate={(dates['previous'] + timedelta(days=-10)).strftime('%Y-%m-%d')}&endDate={dates['previous'].strftime('%Y-%m-%d')}")
-    dates['previous'] = data['dates'][len(data['dates']) - 1]['date']
+    dates['previous'] = dates['day'] + timedelta(days=-1)
+    data = nhl.get_request_nhl_api(schedule_str + f"?startDate={(dates['previous'] + timedelta(days=-days_delta)).strftime('%Y-%m-%d')}&endDate={dates['previous'].strftime('%Y-%m-%d')}")
+    dates['previous'] = data['dates'][len(data['dates']) - 1]['date'] if (data['totalItems'] > 0) else ''
 
+    dates['next'] = dates['day'] + timedelta(days=+1)
+    data = nhl.get_request_nhl_api(schedule_str + f"?startDate={dates['next'].strftime('%Y-%m-%d')}&endDate={(dates['next'] + timedelta(days=+days_delta)).strftime('%Y-%m-%d')}")
+    dates['next'] = data['dates'][0]['date'] if (data['totalItems'] > 0) else ''
 
-    dates['next'] = dates['today'] + timedelta(days=+1)
-    data = nhl.get_request_nhl_api(schedule_str + f"?startDate={dates['next'].strftime('%Y-%m-%d')}&endDate={(dates['next'] + timedelta(days=+10)).strftime('%Y-%m-%d')}")
-    dates['next'] = data['dates'][0]['date']
-
-    dates['today'] = dates['today'].strftime('%Y-%m-%d')
-    #dates['previous'] = dates['previous'].strftime('%Y-%m-%d')
-    #dates['next'] = dates['next'].strftime('%Y-%m-%d')
+    dates['day'] = dates['day'].strftime('%Y-%m-%d')
 
     return dates
 
 
-# Получение от сервера данных расписания на сегодня
-def get_schedule_today():
+# Получение от сервера данных расписания на день ('%Y-%m-%d')
+def get_schedule_data_day(day=None):
 
     schedule_str = "/schedule?expand=schedule.teams,schedule.linescore"
-    #schedule_str = "/schedule?expand=schedule.teams,schedule.linescore&date=2022-11-26"
-    #schedule_str = "/schedule?expand=schedule.teams,schedule.linescore&date=2022-11-23"
 
-    schedule_str += f"&date={date.today().strftime('%Y-%m-%d')}"
+    schedule_str += f"&date={day}" if (day != None) else ''
 
     data = nhl.get_request_nhl_api(schedule_str)
 
     return data
 
 
-# Формирование теста для вывода расписания на сегодня
-def get_schedule_today_text():
-    data = get_schedule_today()
+# Формирование теста для вывода расписания на день ('%Y-%m-%d')
+def get_schedule_day_text(day=None):
+    data = get_schedule_data_day(day)
 
     txt = get_schedule_days_text(data)
 

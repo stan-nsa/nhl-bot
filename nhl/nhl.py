@@ -43,7 +43,6 @@
 #http://site.api.espn.com/apis/site/v2/sports/hockey/nhl/news?limit=15
 
 
-
 import requests
 #from datetime import datetime, timezone, date, timedelta
 #import pytz
@@ -52,10 +51,16 @@ import requests
 
 NHL_API_URL = "https://statsapi.web.nhl.com/api/v1"
 
+proxies = {
+    'http': 'socks5://puser:8888@rkn-pnh.hopto.org:8888',
+    'https': 'socks5://puser:8888@rkn-pnh.hopto.org:8888'
+}
+
+proxies = None
 
 # Запрос к серверу для получения данных
 def get_request_nhl_api(query_str):
-    response = requests.get(NHL_API_URL + query_str, params={"Content-Type": "application/json"})
+    response = requests.get(NHL_API_URL + query_str, params={"Content-Type": "application/json"}, proxies=proxies)
     return response.json()
 
 

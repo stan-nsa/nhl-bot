@@ -32,7 +32,7 @@ skater_stats = {
 
 # Запрос к серверу для получения данных
 def get_request_nhl_stats_api(query_str: str):
-    response = requests.get(NHL_STATS_API_URL + query_str, params={"Content-Type": "application/json"})
+    response = requests.get(NHL_STATS_API_URL + query_str, params={"Content-Type": "application/json"}, proxies=nhl.proxies)
     return response.json()
 
 

@@ -2,6 +2,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from create_bot import dp
 from handlers import nhl, other, schedule, stats
 
+
 nhl.register_handlers_nhl(dp)
 other.register_handlers_other(dp)
 schedule.register_handlers_schedule(dp)
