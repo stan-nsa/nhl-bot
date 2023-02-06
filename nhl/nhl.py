@@ -56,7 +56,7 @@ proxies = {
     'https': 'socks5://puser:8888@rkn-pnh.hopto.org:8888'
 }
 
-proxies = None
+#proxies = None
 
 # Запрос к серверу для получения данных
 def get_request_nhl_api(query_str):
@@ -93,18 +93,36 @@ def get_teams_for_settings():
 
 
 # Получение от сервера данных турнирной таблицы
-def get_standings():
-    standings_str = "/standings"
+def get_standings_data(standingsType=None):
+    standings_str = "/standings" + (f"/{standingsType}" if (standingsType) else '')
 
     data = get_request_nhl_api(standings_str)
 
     return data['records']
 
 
+# Формирование теста для вывода турнирной таблицы в зависимости от типа
+def get_standings_text(standingsType=None, full=False):
+    match standingsType:
+        case 'byLeague':
+            txt = get_standings_league_text(full)
+
+        case 'wildCardWithLeaders':
+            txt = get_standings_wildcard_text(full)
+
+        case 'byDivision':
+            txt = get_standings_division_text(full)
+
+        case _:
+            txt = get_standings_division_text(full)
+
+    return txt
+
+
 # Формирование теста для вывода турнирной таблицы с разбивкой по дивизионам
-def get_standings_text(full=False):
+def get_standings_division_text(full=False):
     #full = True
-    data = get_standings()
+    data = get_standings_data()
 
     txt = "<pre>"
     in_po_symbol = '*'
@@ -121,6 +139,54 @@ def get_standings_text(full=False):
                 txt += f"{team['divisionRank']}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
             else:
                 txt += f"{team['divisionRank']}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
+
+    return txt + "</pre>"
+
+
+# Формирование теста для вывода турнирной таблицы с разбивкой по дивизионам с Wild Card
+def get_standings_wildcard_text(full=False):
+    #full = True
+    data = get_standings_data('wildCardWithLeaders')
+
+    txt = "<pre>"
+    in_po_symbol = '*'
+    #in_po_symbol = emojize(':star:')
+    for div in data:
+        if (full):
+            txt += f"\n#|{div['division']['name'].center(22, '_')}|GP|W |L |O |Pt\n"
+        else:
+            txt += f"\n#|{div['division']['name'].center(22, '_')}|GP|Pt\n"
+
+        for team in div['teamRecords']:
+            in_po = in_po_symbol if (int(team['wildCardRank']) < 3) else (' ')
+            if (full):
+                txt += f"{team['divisionRank']}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
+            else:
+                txt += f"{team['divisionRank']}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
+
+    return txt + "</pre>"
+
+
+# Формирование теста для вывода общей турнирной таблицы
+def get_standings_league_text(full=False):
+    #full = True
+    data = get_standings_data('byLeague')
+
+    txt = "<pre>"
+    in_po_symbol = '*'
+    #in_po_symbol = emojize(':star:')
+
+    if (full):
+        txt += f"\n #|{'NHL'.center(22, '_')}|GP|W |L |O |Pt\n"
+    else:
+        txt += f"\n #|{'NHL'.center(22, '_')}|GP|Pt\n"
+
+    for team in data[0]['teamRecords']:
+        in_po = in_po_symbol if (int(team['wildCardRank']) < 3) else (' ')
+        if (full):
+            txt += f"{team['leagueRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
+        else:
+            txt += f"{team['leagueRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
 
     return txt + "</pre>"
 
