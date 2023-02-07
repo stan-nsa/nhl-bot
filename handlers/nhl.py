@@ -1,23 +1,19 @@
 from aiogram import types, Dispatcher
 from nhl import nhl
+from nhl import keyboards
 
 from aiogram.dispatcher.filters import Text
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 async def command_standings(message: types.Message):
-    await message.reply(f"<b>Турнирная таблица:</b>\n{nhl.get_standings_text(full=False)}", parse_mode="HTML",
-                        reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("Division", callback_data="standings_byDivision"),
-                                                                InlineKeyboardButton("Wild Card", callback_data="standings_wildCardWithLeaders"),
-                                                                InlineKeyboardButton("League", callback_data="standings_byLeague")))
+    await message.answer(f"<b>Турнирная таблица:</b>\n{nhl.get_standings_text(full=False)}", parse_mode="HTML",
+                        reply_markup=keyboards.keyboard_standings())
 
 
 async def command_standings_type(callback : types.CallbackQuery):
     standings_type = callback.data.split('_')[1]
     await callback.message.answer(f"<b>Турнирная таблица:</b>\n{nhl.get_standings_text(standings_type, full=False)}", parse_mode="HTML",
-                                  reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("Division", callback_data="standings_byDivision"),
-                                                                          InlineKeyboardButton("Wild Card", callback_data="standings_wildCardWithLeaders"),
-                                                                          InlineKeyboardButton("League", callback_data="standings_byLeague")))
+                                  reply_markup=keyboards.keyboard_standings())
     await callback.answer()
 
 
