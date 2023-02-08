@@ -62,7 +62,7 @@ proxies = None
 
 # Запрос к серверу для получения данных
 def get_request_nhl_api(query_str):
-    response = requests.get(NHL_API_URL + query_str, params={"Content-Type": "application/json"}, proxies=proxies)
+    response = requests.get(NHL_API_URL + query_str, params={"Content-Type": "application/json"})#, proxies=proxies)
     return response.json()
 
 

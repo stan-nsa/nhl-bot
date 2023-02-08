@@ -18,3 +18,37 @@ def keyboard_standings():
 
     return kb
 
+
+#-- Keyboard for Stats ----------------------------------------------------------------------------
+def keyboard_stats_goalies():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("GGA", callback_data="stats_goalies_goalsAgainstAverage"),
+                                    InlineKeyboardButton("Save %", callback_data="stats_goalies_savePct"),
+                                    InlineKeyboardButton("Shutouts", callback_data="stats_goalies_shutouts"),
+                                    InlineKeyboardButton("Wins", callback_data="stats_goalies_wins"))
+
+    return kb
+
+
+def keyboard_stats_skaters():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data="stats_skaters_points"),
+                                    InlineKeyboardButton("Goals", callback_data="stats_skaters_goals"),
+                                    InlineKeyboardButton("Assists", callback_data="stats_skaters_assists"))
+
+    return kb
+
+
+def keyboard_stats_defensemen():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data="stats_defensemen_points"),
+                                    InlineKeyboardButton("Goals", callback_data="stats_defensemen_goals"),
+                                    InlineKeyboardButton("Assists", callback_data="stats_defensemen_assists"))
+
+    return kb
+
+
+def keyboard_stats_rookies():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data="stats_rookies_points"),
+                                    InlineKeyboardButton("Goals", callback_data="stats_rookies_goals"),
+                                    InlineKeyboardButton("Assists", callback_data="stats_rookies_assists"))
+
+    return kb
+

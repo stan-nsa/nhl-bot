@@ -5,8 +5,6 @@ from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/em
 from nhl import schedule
 from nhl import keyboards
 
-#from create_bot import dp
-
 
 async def command_scores(message: types.Message):
     await message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Результаты матчей:</b>\n{schedule.get_scores_text()}", parse_mode="HTML")

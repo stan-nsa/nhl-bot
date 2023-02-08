@@ -38,7 +38,7 @@ def get_request_nhl_stats_api(query_str: str):
 
 #-- Статистика вратарей ---------------------------------------------------------------------------
 # Получение данных вратарской статистики по указанному стат.показателю
-def get_stats_goalie_data_byProperty(property: str, direction='DESC', limit=10):
+def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10):
     gamesPlayed = 15
     gameTypeId = 2 # 2 = regular season, 3 = playoffs
     seasonId = nhl.get_season_current()['seasonId']
@@ -58,7 +58,7 @@ def get_stats_goalie_data_byProperty(property: str, direction='DESC', limit=10):
 
 
 # Формирование теста для вывода вратарской статистики
-def get_stats_goalie_text_fromData(data, full=False):
+def get_stats_goalies_text_fromData(data, full=False):
     #full = True
     txt = "<pre>"
 
@@ -81,27 +81,27 @@ def get_stats_goalie_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода вратарской статистики по указанному стат.показателю
-def get_stats_goalie_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_goalie_data_byProperty(property, direction, limit)
+def get_stats_goalies_byProperty_text(property: str, direction='DESC', limit=10, full=False):
+    data = get_stats_goalies_data_byProperty(property, direction, limit)
 
-    text = get_stats_goalie_text_fromData(data, full)
+    text = get_stats_goalies_text_fromData(data, full)
 
     return text
 
 
 # Формирование теста для вывода вратарских статистик
-def get_stats_goalie_text(full=False):
-    text = get_stats_goalie_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=full)
-    text += get_stats_goalie_byProperty_text('savePct', full=full)
-    text += get_stats_goalie_byProperty_text('shutouts', full=full)
-    #text += get_stats_goalie_byProperty_text('wins', full=full)
+def get_stats_goalies_text(full=False):
+    text = get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=full)
+    text += get_stats_goalies_byProperty_text('savePct', full=full)
+    text += get_stats_goalies_byProperty_text('shutouts', full=full)
+    #text += get_stats_goalies_byProperty_text('wins', full=full)
 
     return text
 
 
 #-- Статистика полевых ----------------------------------------------------------------------------
 # Получение данных статистики полевых по указанному стат.показателю
-def get_stats_skater_data_byProperty(property: str, direction='DESC', limit=10):
+def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10):
     gamesPlayed = 1
     gameTypeId = 2 # 2 = regular season, 3 = playoffs
     seasonId = nhl.get_season_current()['seasonId']
@@ -121,7 +121,7 @@ def get_stats_skater_data_byProperty(property: str, direction='DESC', limit=10):
 
 
 # Формирование теста для вывода статистики полевых
-def get_stats_skater_text_fromData(data, full=False):
+def get_stats_skaters_text_fromData(data, full=False):
     #full = True
     txt = "<pre>"
 
@@ -144,19 +144,19 @@ def get_stats_skater_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода статистики полевых по указанному стат.показателю
-def get_stats_skater_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_skater_data_byProperty(property, direction, limit)
+def get_stats_skaters_byProperty_text(property: str, direction='DESC', limit=10, full=False):
+    data = get_stats_skaters_data_byProperty(property, direction, limit)
 
-    text = get_stats_skater_text_fromData(data, full)
+    text = get_stats_skaters_text_fromData(data, full)
 
     return text
 
 
 # Формирование теста для вывода статистик полевых
-def get_stats_skater_text(full=False):
-    text = get_stats_skater_byProperty_text(property='points', full=full)
-    text += get_stats_skater_byProperty_text('goals', full=full)
-    text += get_stats_skater_byProperty_text('assists', full=full)
+def get_stats_skaters_text(full=False):
+    text = get_stats_skaters_byProperty_text(property='points', full=full)
+    text += get_stats_skaters_byProperty_text('goals', full=full)
+    text += get_stats_skaters_byProperty_text('assists', full=full)
 
     return text
 
@@ -225,7 +225,7 @@ def get_stats_defensemen_text(full=False):
 
 #-- Статистика новичков -------------------------------------------------------------------------
 # Получение данных статистики новичков по указанному стат.показателю
-def get_stats_rookie_data_byProperty(property: str, direction='DESC', limit=10):
+def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10):
     gamesPlayed = 1
     gameTypeId = 2 # 2 = regular season, 3 = playoffs
     seasonId = nhl.get_season_current()['seasonId']
@@ -245,7 +245,7 @@ def get_stats_rookie_data_byProperty(property: str, direction='DESC', limit=10):
 
 
 # Формирование теста для вывода статистики новичков
-def get_stats_rookie_text_fromData(data, full=False):
+def get_stats_rookies_text_fromData(data, full=False):
     #full = True
     txt = "<pre>"
 
@@ -268,19 +268,19 @@ def get_stats_rookie_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода статистики новичков по указанному стат.показателю
-def get_stats_rookie_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_rookie_data_byProperty(property, direction, limit)
+def get_stats_rookies_byProperty_text(property: str, direction='DESC', limit=10, full=False):
+    data = get_stats_rookies_data_byProperty(property, direction, limit)
 
-    text = get_stats_rookie_text_fromData(data, full)
+    text = get_stats_rookies_text_fromData(data, full)
 
     return text
 
 
 # Формирование теста для вывода статистик новичков
-def get_stats_rookie_text(full=False):
-    text = get_stats_rookie_byProperty_text(property='points', full=full)
-    text += get_stats_rookie_byProperty_text('goals', full=full)
-    text += get_stats_rookie_byProperty_text('assists', full=full)
+def get_stats_rookies_text(full=False):
+    text = get_stats_rookies_byProperty_text(property='points', full=full)
+    text += get_stats_rookies_byProperty_text('goals', full=full)
+    text += get_stats_rookies_byProperty_text('assists', full=full)
 
     return text
 
@@ -288,10 +288,10 @@ def get_stats_rookie_text(full=False):
 #-- Общая статистика ------------------------------------------------------------------------------
 # Формирование теста для вывода статистик
 def get_stats_text(full=False):
-    text = get_stats_skater_text(full=full)
-    text += get_stats_goalie_text(full=full)
+    text = get_stats_skaters_text(full=full)
+    text += get_stats_goalies_text(full=full)
     text += get_stats_defensemen_text(full=full)
-    text += get_stats_rookie_text(full=full)
+    text += get_stats_rookies_text(full=full)
 
     return text
 
