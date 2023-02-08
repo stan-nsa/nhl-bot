@@ -1,3 +1,10 @@
+# Меню команд бота
+#scores - Результаты текущих матчей
+#schedule - Расписание матчей
+#standings - Турнирная таблица
+#stats - Статистика игроков
+#stats_teams - Статистика команд
+
 # Schedule:  https://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.scoringplays,schedule.game.seriesSummary,seriesSummary.series,schedule.linescore
 #            https://statsapi.web.nhl.com/api/v1/schedule?date=2022-11-25
 # Standings: https://statsapi.web.nhl.com/api/v1/standings
@@ -62,7 +69,7 @@ proxies = {
     'https': 'socks5://puser:8888@rkn-pnh.hopto.org:8888'
 }
 
-#proxies = None
+proxies = None
 
 
 # Запрос к серверу для получения данных
