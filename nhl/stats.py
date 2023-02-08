@@ -10,6 +10,12 @@
 #Def https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023 and positionCode="D"
 #Rookie https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023 and isRookie=1
 
+# Teams:
+# https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
+# https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"powerPlayPct","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
+# https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"penaltyKillPct","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
+
+
 import requests
 
 from nhl import nhl
@@ -27,6 +33,13 @@ skater_stats = {
     'points': 'P',
     'goals': 'G',
     'assists': 'A'
+}
+
+team_stats = {
+    'points': 'Pts',
+    'powerPlayPct': 'PP%',
+    'penaltyKillPct': 'PK%',
+    'wins': 'Win'
 }
 
 
@@ -285,13 +298,51 @@ def get_stats_rookies_text(full=False):
     return text
 
 
-#-- Общая статистика ------------------------------------------------------------------------------
-# Формирование теста для вывода статистик
-def get_stats_text(full=False):
-    text = get_stats_skaters_text(full=full)
-    text += get_stats_goalies_text(full=full)
-    text += get_stats_defensemen_text(full=full)
-    text += get_stats_rookies_text(full=full)
+#-- Статистика команд -------------------------------------------------------------------------
+# Получение данных статистики команд по указанному стат.показателю
+def get_stats_teams_data_byProperty(property: str, direction='DESC'):
+    gameTypeId = 2 # 2 = regular season, 3 = playoffs
+    seasonId = nhl.get_season_current()['seasonId']
+
+    query_str = '/team/summary?isAggregate=false&isGame=false'
+    query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
+    query_str_exp = f'&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
+
+    query_str += query_str_sort + query_str_exp
+
+    data = get_request_nhl_stats_api(query_str)
+
+    data['stata'] = property
+
+    return data
+
+
+# Формирование теста для вывода статистики команд
+def get_stats_teams_text_fromData(data, full=False):
+    #full = True
+    txt = "<pre>"
+
+    if (full):
+        txt += f"\n #|{'Team'.center(22, '_')}|{team_stats[data['stata']]}\n"
+    else:
+        txt += f"\n #|{'Team'.center(22, '_')}|{team_stats[data['stata']]}\n"
+
+    n = 0
+    for team in data['data']:
+        n += 1
+        if (full):
+            txt += f"{str(n).rjust(2, ' ')}|{team['teamFullName'].ljust(22, ' ')}|{round(team[data['stata']]*100, 1) if (team[data['stata']] < 1) else team[data['stata']]}\n"
+        else:
+            txt += f"{str(n).rjust(2, ' ')}|{team['teamFullName'].ljust(22, ' ')}|{round(team[data['stata']]*100, 1) if (team[data['stata']] < 1) else team[data['stata']]}\n"
+
+    return txt + "</pre>"
+
+
+# Формирование теста для вывода статистики команд по указанному стат.показателю
+def get_stats_teams_byProperty_text(property: str, direction='DESC', full=False):
+    data = get_stats_teams_data_byProperty(property, direction)
+
+    text = get_stats_teams_text_fromData(data, full)
 
     return text
 
