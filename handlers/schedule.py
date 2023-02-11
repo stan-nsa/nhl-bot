@@ -7,7 +7,14 @@ from nhl import keyboards
 
 
 async def command_scores(message: types.Message):
-    await message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Результаты матчей:</b>\n{schedule.get_scores_text()}", parse_mode="HTML")
+    await message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Результаты матчей:</b>\n{schedule.get_scores_text()}", parse_mode="HTML",
+                         reply_markup=keyboards.keyboard_scores())
+
+
+async def command_scores_details(callback : types.CallbackQuery):
+    await callback.message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Результаты матчей:</b>\n{schedule.get_scores_text(details=True)}", parse_mode="HTML",
+                                  reply_markup=keyboards.keyboard_scores())
+    await callback.answer()
 
 
 async def command_schedule(message: types.Message):
@@ -17,9 +24,14 @@ async def command_schedule(message: types.Message):
 
 
 async def command_schedule_day(callback : types.CallbackQuery):
-    day = callback.data.split('_')[2]
+    callback_data_parts = callback.data.split('_')
+    day = callback_data_parts[2]
+
+    # если в callback.data присутствует '_details', то дополнительно выводится scoring-информация
+    details = True if (len(callback_data_parts) > 3) else False
+
     dates = schedule.get_schedule_dates_for_inlinemenu(day)
-    await callback.message.answer(f"{emojize(':calendar:')} <b>Расписание матчей:</b>\n{schedule.get_schedule_day_text(day)}", parse_mode="HTML",
+    await callback.message.answer(f"{emojize(':calendar:')} <b>Расписание матчей:</b>\n{schedule.get_schedule_day_text(day, details=details)}", parse_mode="HTML",
                                   reply_markup=keyboards.keyboard_schedule(dates))
     await callback.answer()
 
@@ -36,4 +48,5 @@ def register_handlers_schedule(dp: Dispatcher):
     dp.register_message_handler(command_scores, commands=['scores'])
     dp.register_message_handler(command_schedule, commands=['schedule'])
     dp.register_message_handler(command_gameday, commands=['gameday'])
+    dp.register_callback_query_handler(command_scores_details, Text('schedule_scores_details'))
     dp.register_callback_query_handler(command_schedule_day, Text(startswith='schedule_day_'))
