@@ -205,7 +205,7 @@ def scores_details_text(scoringPlays):
         score_teams = f"{score['about']['goals']['away']}:{score['about']['goals']['home']}"    # Счёт
         score_time = f"{score['about']['ordinalNum']}/{score['about']['periodTime']}"   # Время изменения счёта (период/м:с)
         score_strength = f"({score['result']['strength']['code']}) " if (score['result']['strength']['code'] != 'EVEN') else '' # Вывод PPG или SHG
-        score_player_name = name_parts[0][:1] + '.' + name_parts[1]     # Краткое ФИО (И.Фамилия)
+        score_player_name = ' '.join([(name_parts[0][:1] + '.'), *name_parts[1:]])     # Краткое ФИО (И.Фамилия)
         score_player_seasonTotal = score['players'][0]['seasonTotal']   # Шайбы в сезоне
 
         txt += f"<b>{score_teams}</b> ({score_time}) {score_strength}{score_player_name} ({score_player_seasonTotal})\n"
