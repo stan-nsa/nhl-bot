@@ -225,7 +225,7 @@ def get_game_data(game_id):
     return data
 
 
-# Формирование теста для вывода текущих результатов матчей
+# Формирование теста для вывода информации о матче
 def get_game_text(game_id, details=False):
     data = get_game_data(game_id)
 
