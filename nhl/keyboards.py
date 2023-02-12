@@ -8,6 +8,18 @@ def keyboard_scores():
     return kb
 
 
+def keyboard_scores_details():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{emojize(':information:')} More Details", callback_data=f"schedule_scores_games_details"))
+
+    return kb
+
+
+def keyboard_scores_game_details(game):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{emojize(':information:')} Game Details", callback_data=f"schedule_scores_game_details_{game['gamePk']}"))
+
+    return kb
+
+
 def keyboard_schedule(dates): #dates = {'day': '', 'previous': '', 'next': ''}
     kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{dates['previous']} {emojize(':left_arrow:')}", callback_data=f"schedule_day_{dates['previous']}"),
                                     InlineKeyboardButton(f"{emojize(':information:')} Details", callback_data=f"schedule_day_{dates['day']}_details"),
