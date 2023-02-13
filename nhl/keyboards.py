@@ -14,16 +14,24 @@ def keyboard_scores_details():
     return kb
 
 
-def keyboard_scores_game_details(game):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{emojize(':information:')} Game Details", callback_data=f"schedule_scores_game_details_{game['gamePk']}"))
-
-    return kb
-
-
 def keyboard_schedule(dates): #dates = {'day': '', 'previous': '', 'next': ''}
     kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{dates['previous']} {emojize(':left_arrow:')}", callback_data=f"schedule_day_{dates['previous']}"),
                                     InlineKeyboardButton(f"{emojize(':information:')} Details", callback_data=f"schedule_day_{dates['day']}_details"),
                                     InlineKeyboardButton(f"{emojize(':right_arrow:')} {dates['next']}", callback_data=f"schedule_day_{dates['next']}"))
+
+    return kb
+
+
+#-- Keyboard for Game -----------------------------------------------------------------------------
+def keyboard_scores_game_details(game_id):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{emojize(':information:')} Game Details", callback_data=f"schedule_scores_game_details_{game_id}"))
+
+    return kb
+
+
+def keyboard_game_details(game_id):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Scores", callback_data=f"game_details_{game_id}_scoringPlays"),
+                                    InlineKeyboardButton("Penalties", callback_data=f"game_details_{game_id}_penaltyPlays"))
 
     return kb
 

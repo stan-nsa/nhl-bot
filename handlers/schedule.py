@@ -12,7 +12,7 @@ async def command_scores(message: types.Message):
 
 
 async def command_scores_details(callback : types.CallbackQuery):
-    await callback.message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Scores:</b>\n{schedule.get_scores_text(details=True)}", parse_mode="HTML",
+    await callback.message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Scores:</b>\n{schedule.get_scores_text(details=True, hideScore=False)}", parse_mode="HTML",
                                   reply_markup=keyboards.keyboard_scores_details())
     await callback.answer()
 
@@ -25,17 +25,8 @@ async def command_scores_games_details(callback : types.CallbackQuery):
         await callback.message.answer(f"{emojize(':goal_net::ice_hockey:')} <b>Scores:</b>\n", parse_mode="HTML")
 
         for game in date_day['games']:
-            await callback.message.answer(f"{schedule.get_schedule_day_game_text(game, withHeader=True)}", parse_mode="HTML",
-                                          reply_markup=keyboards.keyboard_scores_game_details(game))
-    await callback.answer()
-
-
-async def command_scores_game_details(callback : types.CallbackQuery):
-    callback_data_parts = callback.data.split('_')
-    game_id = callback_data_parts[4]
-
-    await callback.answer(f"Game ID: {game_id}", show_alert=True)
-
+            await callback.message.answer(f"{schedule.get_schedule_day_game_text(game, withHeader=True, hideScore=False)}", parse_mode="HTML",
+                                          reply_markup=keyboards.keyboard_scores_game_details(game['gamePk']))
     await callback.answer()
 
 
@@ -72,5 +63,4 @@ def register_handlers_schedule(dp: Dispatcher):
     dp.register_message_handler(command_gameday, commands=['gameday'])
     dp.register_callback_query_handler(command_scores_details, Text('schedule_scores_details'))
     dp.register_callback_query_handler(command_scores_games_details, Text('schedule_scores_games_details'))
-    dp.register_callback_query_handler(command_scores_game_details, Text(startswith='schedule_scores_game_details'))
     dp.register_callback_query_handler(command_schedule_day, Text(startswith='schedule_day_'))

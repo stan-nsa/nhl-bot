@@ -225,4 +225,11 @@ def get_standings_league_text(full=False):
 
     return txt + "</pre>"
 
-# print(get_schedule_today())
+
+# Краткое ФИО (И.Фамилия)
+def short_player_name(full_name):
+    name_parts = full_name.split()
+    name = ' '.join([(name_parts[0][:1] + '.'), *name_parts[1:]])
+
+    return name
+

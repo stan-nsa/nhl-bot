@@ -11,9 +11,6 @@ tzEST = pytz.timezone("US/Eastern")
 tzMSK = pytz.timezone("Europe/Moscow")
 tzVLAT = pytz.timezone("Asia/Vladivostok")
 
-# Дата для инлайн кнопок
-CurrentDate = ''
-
 
 #== Получение от сервера данных расписания ========================================================
 
@@ -59,16 +56,16 @@ def get_schedule_data_day(day=None):
 
 
 # Формирование теста для вывода расписания на день ('%Y-%m-%d')
-def get_schedule_day_text(day=None, details=False):
+def get_schedule_day_text(day=None, details=False, hideScore=True):
     data = get_schedule_data_day(day)
 
-    txt = get_schedule_days_text(data, details=details)
+    txt = get_schedule_days_text(data, details=details, hideScore=hideScore)
 
     return txt
 
 
 # Формирование теста для вывода расписания за один день
-def get_schedule_days_text(data, details=False):
+def get_schedule_days_text(data, details=False, hideScore=True):
 
     txt = ""
     for date_day in data['dates']:
@@ -99,13 +96,13 @@ def get_schedule_days_text(data, details=False):
                     header_finished = f"\n{emojize(':chequered_flag:')} <b>Finished:</b>\n"
                     txt += header_finished
 
-            txt += get_schedule_day_game_text(game, details=details)
+            txt += get_schedule_day_game_text(game, details=details, hideScore=hideScore)
 
     return txt
 
 
 # Формирование теста для вывода сведений об игре
-def get_schedule_day_game_text(game, details=False, withHeader=False):
+def get_schedule_day_game_text(game, details=False, withHeader=False, hideScore=True):
 
     txt = f"{emojize(':calendar:')} <b>{get_game_time_tz_text(game['gameDate'], withDate=True, withTZ=True)}:</b>\n" if (withHeader) else ''
 
@@ -123,7 +120,7 @@ def get_schedule_day_game_text(game, details=False, withHeader=False):
         if (withHeader):
             txt += f"{emojize(':green_circle:')} <b>Live:</b>\n"
 
-        txt += f"{get_game_teams_score_text(game['teams'], hide=(not details))} - {emojize(':green_circle:')} {game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}\n"
+        txt += f"{get_game_teams_score_text(game['teams'], hideScore=hideScore)} - {emojize(':green_circle:')} {game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}\n"
         txt += f"{scores_details_text(game['scoringPlays'])}" if (details) else ''
 
     # Final
@@ -131,7 +128,7 @@ def get_schedule_day_game_text(game, details=False, withHeader=False):
         if (withHeader):
             txt += f"\n{emojize(':chequered_flag:')} <b>Finished:</b>\n"
 
-        txt += f"{get_game_teams_score_text(game['teams'], hide=(not details))} - {emojize(':chequered_flag:')} " \
+        txt += f"{get_game_teams_score_text(game['teams'], hideScore=hideScore)} - {emojize(':chequered_flag:')} " \
                f"{'' if game['linescore']['currentPeriod'] == 3 else game['linescore']['currentPeriodOrdinal']}\n"
         txt += f"{scores_details_text(game['scoringPlays'])}" if (details) else ''
 
@@ -146,7 +143,7 @@ def get_schedule_day_game_text(game, details=False, withHeader=False):
     return txt
 
 
-def get_game_teams_score_text(game_teams, hide=True):
+def get_game_teams_score_text(game_teams, hideScore=True):
 
     away_team = "<code>" + game_teams['away']['team']['abbreviation'] + "</code>"
     #away_team = game_teams['away']['team']['abbreviation']
@@ -156,17 +153,17 @@ def get_game_teams_score_text(game_teams, hide=True):
     #home_team = game_teams['home']['team']['abbreviation']
     home_team_score = game_teams['home']['score']
 
-    game_teams_score = f"{away_team} {get_game_team_score_text(away_team_score, hide=hide)}{emojize(':ice_hockey:')}{get_game_team_score_text(home_team_score, hide=hide)} {home_team}"
+    game_teams_score = f"{away_team} {get_game_team_score_text(away_team_score, hideScore=hideScore)}{emojize(':ice_hockey:')}{get_game_team_score_text(home_team_score, hideScore=hideScore)} {home_team}"
 
     return game_teams_score
 
 
-def get_game_team_score_text(game_team_score, emoji=True, hide=True):
+def get_game_team_score_text(game_team_score, emoji=True, hideScore=True):
 
     if emoji:
         game_team_score = emojize(f":keycap_{game_team_score}:") if (game_team_score <= 10) else emojize(f":keycap_{game_team_score//10}::keycap_{game_team_score%10}:")
 
-    game_team_score = f"<tg-spoiler>{game_team_score}</tg-spoiler>" if (hide) else f"{game_team_score}"
+    game_team_score = f"<tg-spoiler>{game_team_score}</tg-spoiler>" if (hideScore) else f"{game_team_score}"
 
     return game_team_score
 
@@ -184,10 +181,10 @@ def get_scores():
 
 
 # Формирование теста для вывода текущих результатов матчей
-def get_scores_text(data=None, details=False):
+def get_scores_text(data=None, details=False, hideScore=True):
     data = get_scores() if (data==None) else data
 
-    txt = get_schedule_days_text(data, details=details)
+    txt = get_schedule_days_text(data, details=details, hideScore=hideScore)
 
     return txt
 
@@ -200,36 +197,14 @@ def scores_details_text(scoringPlays):
             continue
 
         #txt += f"<b>{score['about']['goals']['away']}:{score['about']['goals']['home']}</b> ({score['about']['ordinalNum']}/{score['about']['periodTime']}) {score['result']['description']}\n"
-        name_parts = score['players'][0]['player']['fullName'].split()
 
         score_teams = f"{score['about']['goals']['away']}:{score['about']['goals']['home']}"    # Счёт
         score_time = f"{score['about']['ordinalNum']}/{score['about']['periodTime']}"   # Время изменения счёта (период/м:с)
         score_strength = f"({score['result']['strength']['code']}) " if (score['result']['strength']['code'] != 'EVEN') else '' # Вывод PPG или SHG
-        score_player_name = ' '.join([(name_parts[0][:1] + '.'), *name_parts[1:]])     # Краткое ФИО (И.Фамилия)
+        score_player_name = nhl.short_player_name(score['players'][0]['player']['fullName'])     # Краткое ФИО (И.Фамилия)
         score_player_seasonTotal = score['players'][0]['seasonTotal']   # Шайбы в сезоне
 
         txt += f"<b>{score_teams}</b> ({score_time}) {score_strength}{score_player_name} ({score_player_seasonTotal})\n"
-
-    return txt
-
-
-#== Получение от сервера данных о матче ===========================================================
-
-# Получение от сервера данных о матче
-def get_game_data(game_id):
-
-    game_str = f"/api/v1/game/{game_id}/feed/live"
-
-    data = nhl.get_request_nhl_api(game_str)
-
-    return data
-
-
-# Формирование теста для вывода информации о матче
-def get_game_text(game_id, details=False):
-    data = get_game_data(game_id)
-
-    txt = get_schedule_days_text(data, details=details)
 
     return txt
 
@@ -262,7 +237,7 @@ def get_game_time_tz_text(dt_str, withDate=False, withTZ=False):
     dtMSK = dt.astimezone(tzMSK)
     dtVLAT = dt.astimezone(tzVLAT)
 
-    str = f"{dtEST.date().isoformat()} - " if (withDate) else ''
+    str = f"{dtEST.date().isoformat()} {emojize(':alarm_clock:')} " if (withDate) else ''
 
     ft = "%H:%M %Z" if (withTZ) else "%H:%M"
     str += f"{dtEST.strftime(ft)}|{dtMSK.strftime(ft)}|{dtVLAT.strftime(ft).replace('+10', 'KHV')}".upper() #lower()
