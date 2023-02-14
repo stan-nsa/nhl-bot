@@ -17,7 +17,7 @@ tzVLAT = pytz.timezone("Asia/Vladivostok")
 # Получение от сервера данных расписания для инлайн-меню
 def get_schedule_dates_for_inlinemenu(day=None):
 
-    dates = {'day': '', 'previous': '', 'next': ''}
+    dates = {'previous': '', 'day': '', 'next': ''}
     days_delta = 10
 
     schedule_str = "/schedule"
@@ -25,8 +25,7 @@ def get_schedule_dates_for_inlinemenu(day=None):
     if (day == None):
         data = nhl.get_request_nhl_api(schedule_str)
 
-        dates['day'] = date.fromisoformat(data['dates'][0]['date']) if (data['totalItems'] > 0) else \
-                       datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(tzEST)
+        dates['day'] = get_correct_date_from_data(data, as_str=False)
     else:
         dates['day'] = date.fromisoformat(day)
 
@@ -43,8 +42,44 @@ def get_schedule_dates_for_inlinemenu(day=None):
     return dates
 
 
+# Получение от сервера данных расписания на день для инлайн-меню
+def get_schedule_day_games_for_inlinemenu(day=None, data=None):
+    data = get_schedule_day_data(day) if (data == None) else data
+
+    games = []
+
+    for day in data['dates']:
+        for game in day['games']:
+            # Scheduled
+            if int(game['status']['statusCode']) < 3:  # 1 - Scheduled; 2 - Pre-Game
+                txt = f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']}" \
+                      #f"{emojize(':alarm_clock:')}{get_game_time_tz_text(game['gameDate'])}\n"
+
+            # Live
+            elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
+                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {emojize(':green_circle:')} " \
+                      f"{game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}"
+
+            # Final
+            elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
+                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {emojize(':chequered_flag:')} " \
+                      f"{'' if game['linescore']['currentPeriod'] == 3 else game['linescore']['currentPeriodOrdinal']}"
+
+            # TBD/Postponed
+            elif int(game['status']['statusCode']) < 10:  # 8 - Scheduled (Time TBD); 9 - Postponed
+                txt = f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']} " \
+                      f"{emojize(':stop_sign:')} {game['status']['detailedState']}"
+            # Other
+            else:
+                txt = f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']}"
+
+            games.append({'id': game['gamePk'], 'text': txt})
+
+    return games
+
+
 # Получение от сервера данных расписания на день ('%Y-%m-%d')
-def get_schedule_data_day(day=None):
+def get_schedule_day_data(day=None):
 
     schedule_str = "/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays"
 
@@ -56,15 +91,15 @@ def get_schedule_data_day(day=None):
 
 
 # Формирование теста для вывода расписания на день ('%Y-%m-%d')
-def get_schedule_day_text(day=None, details=False, hideScore=True):
-    data = get_schedule_data_day(day)
+def get_schedule_day_text(day=None, data=None, details=False, hideScore=True):
+    data = get_schedule_day_data(day) if (data == None) else data
 
     txt = get_schedule_days_text(data, details=details, hideScore=hideScore)
 
     return txt
 
 
-# Формирование теста для вывода расписания за один день
+# Формирование теста для вывода расписания
 def get_schedule_days_text(data, details=False, hideScore=True):
 
     txt = ""
@@ -143,14 +178,12 @@ def get_schedule_day_game_text(game, details=False, withHeader=False, hideScore=
     return txt
 
 
-def get_game_teams_score_text(game_teams, hideScore=True):
+def get_game_teams_score_text(game_teams, hideScore=True, as_code=True):
 
-    away_team = "<code>" + game_teams['away']['team']['abbreviation'] + "</code>"
-    #away_team = game_teams['away']['team']['abbreviation']
+    away_team = f"<code>{game_teams['away']['team']['abbreviation']}</code>" if (as_code) else game_teams['away']['team']['abbreviation']
     away_team_score = game_teams['away']['score']
 
-    home_team = "<code>" + game_teams['home']['team']['abbreviation'] + "</code>"
-    #home_team = game_teams['home']['team']['abbreviation']
+    home_team = f"<code>{game_teams['home']['team']['abbreviation']}</code>" if (as_code) else game_teams['home']['team']['abbreviation']
     home_team_score = game_teams['home']['score']
 
     game_teams_score = f"{away_team} {get_game_team_score_text(away_team_score, hideScore=hideScore)}{emojize(':ice_hockey:')}{get_game_team_score_text(home_team_score, hideScore=hideScore)} {home_team}"
@@ -173,9 +206,7 @@ def get_game_team_score_text(game_team_score, emoji=True, hideScore=True):
 # Получение от сервера данных текущих результатов матчей
 def get_scores():
 
-    schedule_str = "/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays"
-
-    data = nhl.get_request_nhl_api(schedule_str)
+    data = get_schedule_day_data()
 
     return data
 
@@ -243,4 +274,15 @@ def get_game_time_tz_text(dt_str, withDate=False, withTZ=False):
     str += f"{dtEST.strftime(ft)}|{dtMSK.strftime(ft)}|{dtVLAT.strftime(ft).replace('+10', 'KHV')}".upper() #lower()
 
     return str
+
+
+# Получение корректной даты, если получены пустые данные
+def get_correct_date_from_data(data, as_str=True):
+    if (data['totalItems'] > 0):
+        day = data['dates'][0]['date'] if (as_str) else date.fromisoformat(data['dates'][0]['date'])
+    else:
+        day = datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(tzEST)
+        day = day.date().isoformat() if (as_str) else day
+
+    return day
 
