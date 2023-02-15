@@ -260,3 +260,10 @@ def get_correct_date_from_data(data, as_str=True):
 
     return day
 
+def get_schedule_data_by_dame_for_leagueRecords(game_id: str):
+    schedule_str = f"/schedule?expand=schedule.leagueRecord&gamePk={game_id}"
+
+    data = nhl.get_request_nhl_api(schedule_str)
+
+    return data
+

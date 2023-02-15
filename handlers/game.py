@@ -12,7 +12,7 @@ async def command_game_details(callback : types.CallbackQuery):
     details = callback_data_parts[3]
 
     await callback.message.answer(
-        f"{nhl.ico['scores']} <b>Scores:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
+        f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
         reply_markup=keyboards.keyboard_game_details(game_id))
 
     await callback.answer()
