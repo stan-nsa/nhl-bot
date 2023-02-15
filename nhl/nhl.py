@@ -5,61 +5,17 @@
 #stats - Статистика игроков
 #stats_teams - Статистика команд
 
-# Schedule:  https://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.scoringplays,schedule.game.seriesSummary,seriesSummary.series,schedule.linescore
-#            https://statsapi.web.nhl.com/api/v1/schedule?date=2022-11-25
-# Standings: https://statsapi.web.nhl.com/api/v1/standings
-# Boxscore:  https://statsapi.web.nhl.com/api/v1/game/2021021092/boxscore
-
-# https://records.nhl.com/site/api/franchise
 
 # Season (current):  https://statsapi.web.nhl.com/api/v1/seasons/current
-
-# All players: https://records.nhl.com/site/api/player/
-
-# Goalie:
-# https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023
-# https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023&sort=wins&direction=DESC
-# https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023&sort=goalsAgainstAverage&direction=ASC
-# https://records.nhl.com/site/api/goalie-season-stats?cayenneExp=seasonId=20222023&sort=gamesPlayed&direction=DESC
-
-# https://api.nhle.com/stats/rest/en/goalie/summary?isAggregate=false&isGame=false&sort=[{"property":"wins","direction":"DESC"},{"property":"savePct","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023
-# desired stats: S/C(Shoots/Catches), GP, GS, W, L, OT (Overtime Losses), SA (Shots Against), Svs (Saves), GA (Goals Against), Sv% (Save %) GAA (Goals-Against-Avg), TOI, PIM
-# https://api.nhle.com/stats/rest/en/goalie/summary?isAggregate=false&isGame=false&sort=[{"property":"wins","direction":"DESC"},{"property":"savePct","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=franchiseId=16 and gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023
-
-# Skater:
-# https://records.nhl.com/site/api/skater-playoff-scoring?cayenneExp=seasonId=20212022&sort=points&direction=DESC
-# https://records.nhl.com/site/api/skater-playoff-scoring?cayenneExp=seasonId=20212022&sort=goals&direction=DESC
-# https://records.nhl.com/site/api/skater-playoff-scoring?cayenneExp=seasonId=20212022&sort=gamesPlayed&direction=DESC
-
-# https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"},{"property":"goals","direction":"DESC"},{"property":"assists","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=franchiseId%3D32 and gameTypeId=2 and seasonId<=20192020 and seasonId>=20192020
-# https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"},{"property":"goals","direction":"DESC"},{"property":"assists","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=franchiseId=16 and gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023
-# https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"},{"property":"goals","direction":"DESC"},{"property":"assists","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023
-# Def https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023 and positionCode="D"
-# Rookie https://api.nhle.com/stats/rest/en/skater/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=50&factCayenneExp=gamesPlayed>=1&cayenneExp=gameTypeId=2 and seasonId<=20222023 and seasonId>=20222023 and isRookie=1
-
-
-# Teams:
-# https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
-# https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"powerPlayPct","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
-# https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"penaltyKillPct","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
-
-# https://api.nhle.com/stats/rest/en/franchise?sort=fullName&include=lastSeason.id&include=firstSeason.id
-# https://api.nhle.com/stats/rest/en/shiftcharts?cayenneExp=gameId=
-
-# Player image URLs
-#        https://nhl.bamcontent.com/images/headshots/current/168x168/###.jpg";  // Image URL for for player 8471675 (Sidney Crosby): https://nhl.bamcontent.com/images/headshots/current/168x168/8471675@2x.jpg
-#        https://nhl.bamcontent.com/images/headshots/current/168x168/###@2x.jpg";  // Image URL for 2x size for player 8471675 (Sidney Crosby): https://nhl.bamcontent.com/images/headshots/current/168x168/8471675@2x.jpg
-#        https://nhl.bamcontent.com/images/headshots/current/168x168/###@3x.jpg"; // Image URL for 3x size for player 8471675 (Sidney Crosby): https://nhl.bamcontent.com/images/headshots/current/168x168/8471675@2x.jpg
-
 # ESPN News
 # http://site.api.espn.com/apis/site/v2/sports/hockey/nhl/news?limit=15
 
 
 import requests
+from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/   https://k3a.me/telegram-emoji-list-codes-descriptions/
+import pytz
 
 # from datetime import datetime, timezone, date, timedelta
-# import pytz
-# from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/
 # import db
 
 NHL_API_URL = "https://statsapi.web.nhl.com/api/v1"
@@ -70,6 +26,41 @@ proxies = {
 }
 
 proxies = None
+
+# Иконки/значки для статусов и визуализации информации
+ico = {
+    'hockey': emojize(':ice_hockey:'),
+    'schedule': emojize(':calendar:'),
+    'scores': emojize(':goal_net::ice_hockey:'),
+    'time': emojize(':alarm_clock:'),
+    'standings': emojize(':trophy:'),
+    'stats': emojize(':alarm_clock:'),
+
+    'scheduled': emojize(':calendar:'),
+    'live': emojize(':green_circle:'),
+    'finished': emojize(':chequered_flag:'),
+    'tbd': emojize(':purple_circle:'),
+
+    'info': emojize(':information:'),
+    'prev': emojize(':left_arrow:'),
+    'next': emojize(':right_arrow:'),
+
+
+    'stick': emojize(':ice_hockey:'),
+    'vs': emojize(':ice_hockey:'), # Versus
+    'skater': emojize(':ice_hockey:'),
+    'goalie': emojize(':goal_net:'),
+    'goal': emojize(':police_car_light:'),
+    'penalty': emojize(':stop_sign:') #:boxing_gloves: :boxing_glove: :stop_sign: :octagonal_sign: :parking:
+}
+
+# TimeZone
+tz = {
+    'EST': pytz.timezone("US/Eastern"),
+    'MSK': pytz.timezone("Europe/Moscow"),
+    'VLAT': pytz.timezone("Asia/Vladivostok"),
+    'KHV': pytz.timezone("Asia/Vladivostok")
+}
 
 
 # Запрос к серверу для получения данных

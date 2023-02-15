@@ -10,11 +10,11 @@ def keyboard_scores(day):
 
 def keyboard_schedule(dates=None, day=None): # dates = {'day': '', 'previous': '', 'next': ''}, day = str('%Y-%m-%d')
     if (dates):
-        kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{dates['previous']} {emojize(':left_arrow:')}", callback_data=f"schedule_day_{dates['previous']}"),
-                                        InlineKeyboardButton(f"{emojize(':information:')} Details", callback_data=f"schedule_details_day_{dates['day']}"),
-                                        InlineKeyboardButton(f"{emojize(':right_arrow:')} {dates['next']}", callback_data=f"schedule_day_{dates['next']}"))
+        kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{dates['previous']} {emojize(':left_arrow:')}", callback_data=f"Schedule_day_{dates['previous']}"),
+                                        InlineKeyboardButton(f"{emojize(':information:')} Details", callback_data=f"Schedule_Details_day_{dates['day']}"),
+                                        InlineKeyboardButton(f"{emojize(':right_arrow:')} {dates['next']}", callback_data=f"Schedule_day_{dates['next']}"))
     else:
-        kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{emojize(':information:')} Details", callback_data=f"schedule_details_day_{day}"))
+        kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{emojize(':information:')} Details", callback_data=f"Schedule_Details_day_{day}"))
 
     return kb
 
@@ -23,15 +23,15 @@ def keyboard_schedule_details(games):
     kb = InlineKeyboardMarkup()
 
     for game in games:
-        kb.add(InlineKeyboardButton(game['text'], callback_data=f"game_details_{game['id']}_scoringPlays"))
+        kb.add(InlineKeyboardButton(game['text'], callback_data=f"Game_Details_{game['id']}_scoringPlays"))
 
     return kb
 
 
 #-- Keyboard for Game -----------------------------------------------------------------------------
 def keyboard_game_details(game_id):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Scores", callback_data=f"game_details_{game_id}_scoringPlays"),
-                                    InlineKeyboardButton("Penalties", callback_data=f"game_details_{game_id}_penaltyPlays"))
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Scores", callback_data=f"Game_Details_{game_id}_scoringPlays"),
+                                    InlineKeyboardButton("Penalties", callback_data=f"Game_Details_{game_id}_penaltyPlays"))
 
     return kb
 

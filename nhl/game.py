@@ -1,9 +1,5 @@
-from datetime import datetime, timezone, date, timedelta
-from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/
 from nhl import nhl
 from nhl import schedule
-
-import pytz
 
 
 #== Получение от сервера данных о матче ===========================================================
@@ -25,35 +21,35 @@ def get_game_text(game_id, details='scoringPlays'):
     live = data['liveData']
     linescore = live['linescore']
 
-    txt = f"{emojize(':calendar:')} <b>{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withDate=True, withTZ=True)}:</b>\n"
+    txt = f"{nhl.ico['schedule']} <b>{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withDate=True, withTZ=True)}:</b>\n"
 
     away_team = game['teams']['away']['name']  # ['abbreviation']
     home_team = game['teams']['home']['name']  # ['abbreviation']
 
     # Scheduled
     if int(game['status']['statusCode']) < 3:  # 1 - Scheduled; 2 - Pre-Game
-        txt += f"{emojize(':alarm_clock:')} <b>Scheduled:</b>\n"
-        txt += f"{away_team}{emojize(':ice_hockey:')}{home_team}" \
-               f"{emojize(':alarm_clock:')}{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withTZ=True)}\n"
+        txt += f"{nhl.ico['time']} <b>Scheduled:</b>\n"
+        txt += f"{away_team}{nhl.ico['vs']}{home_team}" \
+               f"{nhl.ico['time']}{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withTZ=True)}\n"
     # Live
     elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
-        txt += f"{emojize(':green_circle:')} <b>Live: {linescore['currentPeriodOrdinal']} / {linescore['currentPeriodTimeRemaining']}</b>\n"
+        txt += f"{nhl.ico['live']} <b>Live: {linescore['currentPeriodOrdinal']} / {linescore['currentPeriodTimeRemaining']}</b>\n"
         txt += f"{get_game_teams_score_text(linescore)}\n"
         txt += f"{game_plays_details_text(live['plays'], details)}"
 
     # Final
     elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
-        txt += f"\n{emojize(':chequered_flag:')} <b>Finished:</b> {'' if linescore['currentPeriod'] == 3 else linescore['currentPeriodOrdinal']}\n"
+        txt += f"\n{nhl.ico['finished']} <b>Finished:</b> {'' if linescore['currentPeriod'] == 3 else linescore['currentPeriodOrdinal']}\n"
         txt += f"{get_game_teams_score_text(linescore)}\n"
         txt += f"{game_plays_details_text(live['plays'], details)}"
 
     # TBD/Postponed
     elif int(game['status']['statusCode']) < 10:  # 8 - Scheduled (Time TBD); 9 - Postponed
-        txt += f"{away_team}{emojize(':ice_hockey:')}{home_team} " \
-               f"{emojize(':stop_sign:')} {game['status']['detailedState']}\n"
+        txt += f"{away_team}{nhl.ico['vs']}{home_team} " \
+               f"{nhl.ico['tbd']} {game['status']['detailedState']}\n"
     # Other
     else:
-        txt += f"{away_team}{emojize(':ice_hockey:')}{home_team}\n"
+        txt += f"{away_team}{nhl.ico['vs']}{home_team}\n"
 
     return txt
 
@@ -93,7 +89,7 @@ def game_plays_details_text(plays, type_plays: str):
                 score_strength = f"({score['result']['strength']['code']}) " if (score['result']['strength']['code'] != 'EVEN') else '' # Вывод PPG или SHG
                 score_players = score['result']['description'] #.split(', assists: ')
 
-                txt += f"\n<b>{score_teams}</b> ({score_team}) ({score_time}) {score_strength}{score_players}\n"
+                txt += f"\n<b>{score_teams}</b> ({score_team}) ({score_time}) {nhl.ico['goal']} {score_strength}{score_players}\n"
 
             case 'penaltyPlays':
                 penalty = all_plays[idx_play]
@@ -103,7 +99,7 @@ def game_plays_details_text(plays, type_plays: str):
                 penalty_desc = penalty['result']['description']  # Описание нарушения
                 penalty_minutes = penalty['result']['penaltyMinutes']  # Срок отбывания нарушения
 
-                txt += f"\n<b>{penalty_time}</b> ({penalty_team}) ({penalty_minutes} min.) {penalty_desc}\n"
+                txt += f"\n<b>{penalty_time}</b> ({penalty_team}) ({penalty_minutes} min.) {nhl.ico['penalty']} {penalty_desc}\n"
 
             case _:
                 continue

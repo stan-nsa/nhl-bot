@@ -1,15 +1,11 @@
+# Schedule:  https://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.scoringplays,schedule.game.seriesSummary,seriesSummary.series,schedule.linescore
+#            https://statsapi.web.nhl.com/api/v1/schedule?date=2022-11-25
+
+
 from datetime import datetime, timezone, date, timedelta
 from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/
 from nhl import nhl
 from db import db
-
-import pytz
-
-
-# TimeZone
-tzEST = pytz.timezone("US/Eastern")
-tzMSK = pytz.timezone("Europe/Moscow")
-tzVLAT = pytz.timezone("Asia/Vladivostok")
 
 
 #== Получение от сервера данных расписания ========================================================
@@ -52,26 +48,26 @@ def get_schedule_day_games_for_inlinemenu(day=None, data=None):
         for game in day['games']:
             # Scheduled
             if int(game['status']['statusCode']) < 3:  # 1 - Scheduled; 2 - Pre-Game
-                txt = f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']}" \
-                      #f"{emojize(':alarm_clock:')}{get_game_time_tz_text(game['gameDate'])}\n"
+                txt = f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']}" \
+                      f"{nhl.ico['time']}{get_game_time_tz_text(game['gameDate'], withTZ=True)}\n"
 
             # Live
             elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
-                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {emojize(':green_circle:')} " \
+                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {nhl.ico['live']} " \
                       f"{game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}"
 
             # Final
             elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
-                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {emojize(':chequered_flag:')} " \
+                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {nhl.ico['finished']} " \
                       f"{'' if game['linescore']['currentPeriod'] == 3 else game['linescore']['currentPeriodOrdinal']}"
 
             # TBD/Postponed
             elif int(game['status']['statusCode']) < 10:  # 8 - Scheduled (Time TBD); 9 - Postponed
-                txt = f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']} " \
-                      f"{emojize(':stop_sign:')} {game['status']['detailedState']}"
+                txt = f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']} " \
+                      f"{nhl.ico['tbd']} {game['status']['detailedState']}"
             # Other
             else:
-                txt = f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']}"
+                txt = f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']}"
 
             games.append({'id': game['gamePk'], 'text': txt})
 
@@ -91,21 +87,21 @@ def get_schedule_day_data(day=None):
 
 
 # Формирование теста для вывода расписания на день ('%Y-%m-%d')
-def get_schedule_day_text(day=None, data=None, details=False, hideScore=True):
+def get_schedule_day_text(day=None, data=None, hideScore=True):
     data = get_schedule_day_data(day) if (data == None) else data
 
-    txt = get_schedule_days_text(data, details=details, hideScore=hideScore)
+    txt = get_schedule_days_text(data, hideScore=hideScore)
 
     return txt
 
 
 # Формирование теста для вывода расписания
-def get_schedule_days_text(data, details=False, hideScore=True):
+def get_schedule_days_text(data, hideScore=True):
 
     txt = ""
     for date_day in data['dates']:
 
-        txt += f"\n{emojize(':calendar:')} <b>{date_day['date']}:</b>\n"
+        txt += f"\n{nhl.ico['schedule']} <b>{date_day['date']}:</b>\n"
 
         header_live = ''
         header_scheduled = ''
@@ -115,65 +111,63 @@ def get_schedule_days_text(data, details=False, hideScore=True):
             if int(game['status']['statusCode']) < 3:  # 1 - Scheduled; 2 - Pre-Game
                 if (header_scheduled == ''): # Заголовок таблицы расписания
                     header_scheduled = \
-                        f"\n{emojize(':alarm_clock:')} <b>Scheduled:</b>\n" \
-                        f"<code>___{emojize(':ice_hockey:')}___{emojize(':alarm_clock:')}_EST_|_MSK_|_KHV_</code>\n"
+                        f"\n{nhl.ico['time']} <b>Scheduled:</b>\n" \
+                        f"<code>___{nhl.ico['vs']}___{nhl.ico['time']}_EST_|_MSK_|_KHV_</code>\n"
                     txt += header_scheduled
 
             # Live
             elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
                 if (header_live == ''):
-                    header_live = f"\n{emojize(':green_circle:')} <b>Live:</b>\n"
+                    header_live = f"\n{nhl.ico['live']} <b>Live:</b>\n"
                     txt += header_live
 
             # Final
             elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
                 if (header_finished == ''):
-                    header_finished = f"\n{emojize(':chequered_flag:')} <b>Finished:</b>\n"
+                    header_finished = f"\n{nhl.ico['finished']} <b>Finished:</b>\n"
                     txt += header_finished
 
-            txt += get_schedule_day_game_text(game, details=details, hideScore=hideScore)
+            txt += get_schedule_day_game_text(game, hideScore=hideScore)
 
     return txt
 
 
 # Формирование теста для вывода сведений об игре
-def get_schedule_day_game_text(game, details=False, withHeader=False, hideScore=True):
+def get_schedule_day_game_text(game, withHeader=False, hideScore=True):
 
-    txt = f"{emojize(':calendar:')} <b>{get_game_time_tz_text(game['gameDate'], withDate=True, withTZ=True)}:</b>\n" if (withHeader) else ''
+    txt = f"{nhl.ico['schedule']} <b>{get_game_time_tz_text(game['gameDate'], withDate=True, withTZ=True)}:</b>\n" if (withHeader) else ''
 
     # Scheduled
     if int(game['status']['statusCode']) < 3:  # 1 - Scheduled; 2 - Pre-Game
         if (withHeader): # Заголовок таблицы расписания
             txt += \
-                f"{emojize(':alarm_clock:')} <b>Scheduled:</b>\n" \
-                f"<code>___{emojize(':ice_hockey:')}___{emojize(':alarm_clock:')}_EST_|_MSK_|_KHV_</code>\n"
+                f"{nhl.ico['time']} <b>Scheduled:</b>\n" \
+                f"<code>___{nhl.ico['vs']}___{nhl.ico['time']}_EST_|_MSK_|_KHV_</code>\n"
 
-        txt += f"<code>{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']}" \
-               f"{emojize(':alarm_clock:')}{get_game_time_tz_text(game['gameDate'])}</code>\n"
+        txt += f"<code>{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']}" \
+               f"{nhl.ico['time']}{get_game_time_tz_text(game['gameDate'])}</code>\n"
     # Live
     elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
         if (withHeader):
-            txt += f"{emojize(':green_circle:')} <b>Live:</b>\n"
+            txt += f"{nhl.ico['live']} <b>Live:</b>\n"
 
-        txt += f"{get_game_teams_score_text(game['teams'], hideScore=hideScore)} - {emojize(':green_circle:')} {game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}\n"
-        txt += f"{scores_details_text(game['scoringPlays'])}" if (details) else ''
+        txt += f"{get_game_teams_score_text(game['teams'], hideScore=hideScore)} - {nhl.ico['live']} {game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}\n"
 
     # Final
     elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
         if (withHeader):
-            txt += f"\n{emojize(':chequered_flag:')} <b>Finished:</b>\n"
+            txt += f"\n{nhl.ico['finished']} <b>Finished:</b>\n"
 
-        txt += f"{get_game_teams_score_text(game['teams'], hideScore=hideScore)} - {emojize(':chequered_flag:')} " \
+        txt += f"{get_game_teams_score_text(game['teams'], hideScore=hideScore)} - {nhl.ico['finished']} " \
                f"{'' if game['linescore']['currentPeriod'] == 3 else game['linescore']['currentPeriodOrdinal']}\n"
-        txt += f"{scores_details_text(game['scoringPlays'])}" if (details) else ''
 
     # TBD/Postponed
     elif int(game['status']['statusCode']) < 10:  # 8 - Scheduled (Time TBD); 9 - Postponed
-        txt += f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']} " \
-               f"{emojize(':stop_sign:')} {game['status']['detailedState']}\n"
+        txt += f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']} " \
+               f"{nhl.ico['tbd']} {game['status']['detailedState']}\n"
     # Other
     else:
-        txt += f"{game['teams']['away']['team']['abbreviation']}{emojize(':ice_hockey:')}{game['teams']['home']['team']['abbreviation']}\n"
+        txt += f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']}\n"
 
     return txt
 
@@ -186,7 +180,7 @@ def get_game_teams_score_text(game_teams, hideScore=True, as_code=True):
     home_team = f"<code>{game_teams['home']['team']['abbreviation']}</code>" if (as_code) else game_teams['home']['team']['abbreviation']
     home_team_score = game_teams['home']['score']
 
-    game_teams_score = f"{away_team} {get_game_team_score_text(away_team_score, hideScore=hideScore)}{emojize(':ice_hockey:')}{get_game_team_score_text(home_team_score, hideScore=hideScore)} {home_team}"
+    game_teams_score = f"{away_team} {get_game_team_score_text(away_team_score, hideScore=hideScore)}{nhl.ico['vs']}{get_game_team_score_text(home_team_score, hideScore=hideScore)} {home_team}"
 
     return game_teams_score
 
@@ -215,27 +209,7 @@ def get_scores():
 def get_scores_text(data=None, details=False, hideScore=True):
     data = get_scores() if (data==None) else data
 
-    txt = get_schedule_days_text(data, details=details, hideScore=hideScore)
-
-    return txt
-
-
-# Формирование теста для вывода изменения счёта матча
-def scores_details_text(scoringPlays):
-    txt = ''
-    for score in scoringPlays:
-        if (score['about']['periodType'] == 'SHOOTOUT'):
-            continue
-
-        #txt += f"<b>{score['about']['goals']['away']}:{score['about']['goals']['home']}</b> ({score['about']['ordinalNum']}/{score['about']['periodTime']}) {score['result']['description']}\n"
-
-        score_teams = f"{score['about']['goals']['away']}:{score['about']['goals']['home']}"    # Счёт
-        score_time = f"{score['about']['ordinalNum']}/{score['about']['periodTime']}"   # Время изменения счёта (период/м:с)
-        score_strength = f"({score['result']['strength']['code']}) " if (score['result']['strength']['code'] != 'EVEN') else '' # Вывод PPG или SHG
-        score_player_name = nhl.short_player_name(score['players'][0]['player']['fullName'])     # Краткое ФИО (И.Фамилия)
-        score_player_seasonTotal = score['players'][0]['seasonTotal']   # Шайбы в сезоне
-
-        txt += f"<b>{score_teams}</b> ({score_time}) {score_strength}{score_player_name} ({score_player_seasonTotal})\n"
+    txt = get_schedule_days_text(data, hideScore=hideScore)
 
     return txt
 
@@ -264,14 +238,14 @@ def get_game_time_tz_text(dt_str, withDate=False, withTZ=False):
 
     dt = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
-    dtEST = dt.astimezone(tzEST)
-    dtMSK = dt.astimezone(tzMSK)
-    dtVLAT = dt.astimezone(tzVLAT)
+    dtEST = dt.astimezone(nhl.tz['EST'])
+    dtMSK = dt.astimezone(nhl.tz['MSK'])
+    dtKHV = dt.astimezone(nhl.tz['KHV'])
 
-    str = f"{dtEST.date().isoformat()} {emojize(':alarm_clock:')} " if (withDate) else ''
+    str = f"{dtEST.date().isoformat()} {nhl.ico['time']} " if (withDate) else ''
 
     ft = "%H:%M %Z" if (withTZ) else "%H:%M"
-    str += f"{dtEST.strftime(ft)}|{dtMSK.strftime(ft)}|{dtVLAT.strftime(ft).replace('+10', 'KHV')}".upper() #lower()
+    str += f"{dtEST.strftime(ft)}|{dtMSK.strftime(ft)}|{dtKHV.strftime(ft).replace('+10', 'KHV')}".upper() #lower()
 
     return str
 
@@ -281,7 +255,7 @@ def get_correct_date_from_data(data, as_str=True):
     if (data['totalItems'] > 0):
         day = data['dates'][0]['date'] if (as_str) else date.fromisoformat(data['dates'][0]['date'])
     else:
-        day = datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(tzEST)
+        day = datetime.strptime(data['metaData']['timeStamp'], "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc).astimezone(nhl.tz['EST'])
         day = day.date().isoformat() if (as_str) else day
 
     return day
