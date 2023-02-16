@@ -63,6 +63,9 @@ tz = {
 }
 
 
+hide_score = True # Скрывать счёт в командах scores, schedule (в детальных статусах матчей игнорируется)
+
+
 # Запрос к серверу для получения данных
 def get_request_nhl_api(query_str):
     response = requests.get(NHL_API_URL + query_str, params={"Content-Type": "application/json"})#, proxies=proxies)

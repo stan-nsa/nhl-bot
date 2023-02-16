@@ -21,41 +21,56 @@ def get_game_text(game_id, details='scoringPlays'):
     live = data['liveData']
     linescore = live['linescore']
 
-    txt = f"{nhl.ico['schedule']} <b>{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withDate=True, withTZ=True)}:</b>\n"
+    txt_game_status = ''
+    txt_game_summary = ''
+    txt_game_details = ''
+    txt_team_away_score = ''
+    txt_team_home_score = ''
 
-    #-- Статистика команд на момент матча -------
+    team_away = game['teams']['away']['name']
+    team_home = game['teams']['home']['name']
+    team_away_score = live['linescore']['teams']['away']['goals']
+    team_home_score = live['linescore']['teams']['home']['goals']
+
+    #-- Статистика команд на момент матча: (wins-losses-ot) --
     teams_leagueRecords = schedule.get_schedule_data_by_dame_for_leagueRecords(game_id)['dates'][0]['games'][0]['teams']
-    txt += f"\n<b>{game['teams']['away']['name']}</b> ({teams_leagueRecords['away']['leagueRecord']['wins']}-{teams_leagueRecords['away']['leagueRecord']['losses']}-{teams_leagueRecords['away']['leagueRecord']['ot']})\n"
-    txt += f"<b>{game['teams']['home']['name']}</b> ({teams_leagueRecords['home']['leagueRecord']['wins']}-{teams_leagueRecords['home']['leagueRecord']['losses']}-{teams_leagueRecords['home']['leagueRecord']['ot']})\n"
-    #--------------------------------------------
-
-    away_team = game['teams']['away']['teamName'] # ['name']  # ['abbreviation']
-    home_team = game['teams']['home']['teamName'] # ['name']  # ['abbreviation']
+    team_away_w_l_o = f"({teams_leagueRecords['away']['leagueRecord']['wins']}-{teams_leagueRecords['away']['leagueRecord']['losses']}-{teams_leagueRecords['away']['leagueRecord']['ot']})"
+    team_home_w_l_o = f"({teams_leagueRecords['home']['leagueRecord']['wins']}-{teams_leagueRecords['home']['leagueRecord']['losses']}-{teams_leagueRecords['home']['leagueRecord']['ot']})"
+    # --------------------------------------------------------
 
     # Scheduled
     if int(game['status']['statusCode']) < 3:  # 1 - Scheduled; 2 - Pre-Game
-        txt += f"\n{nhl.ico['time']} <b>Scheduled:</b>\n"
-        txt += f"<code>{away_team}{nhl.ico['vs']}{home_team}" \
-               f"{nhl.ico['time']}{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withTZ=True)}</code>\n"
+        txt_game_status = f"{nhl.ico['time']} <b>Scheduled:</b> {nhl.ico['time']}{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withTZ=True)}"
     # Live
     elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
-        txt += f"\n{nhl.ico['live']} <b>Live: {linescore['currentPeriodOrdinal']} / {linescore['currentPeriodTimeRemaining']}</b>\n"
-        txt += game_summary_text(data)
-        txt += f"{game_plays_details_text(live['plays'], details)}"
+        txt_game_status = f"{nhl.ico['live']} <b>Live: {linescore['currentPeriodOrdinal']} / {linescore['currentPeriodTimeRemaining']}</b>"
+        txt_team_away_score = schedule.get_game_team_score_text(team_away_score)
+        txt_team_home_score = schedule.get_game_team_score_text(team_home_score)
+        txt_game_summary = game_summary_text(data)
+        txt_game_details = f"{game_plays_details_text(live['plays'], details)}"
 
     # Final
     elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
-        txt += f"\n{nhl.ico['finished']} <b>Finished:</b> {'' if linescore['currentPeriod'] == 3 else linescore['currentPeriodOrdinal']}\n"
-        txt += game_summary_text(data)
-        txt += f"{game_plays_details_text(live['plays'], details)}"
+        txt_game_status = f"{nhl.ico['finished']} <b>Finished:</b> {'' if linescore['currentPeriod'] == 3 else linescore['currentPeriodOrdinal']}"
+        txt_team_away_score = schedule.get_game_team_score_text(team_away_score)
+        txt_team_home_score = schedule.get_game_team_score_text(team_home_score)
+        txt_game_summary = game_summary_text(data)
+        txt_game_details = f"{game_plays_details_text(live['plays'], details)}"
 
     # TBD/Postponed
     elif int(game['status']['statusCode']) < 10:  # 8 - Scheduled (Time TBD); 9 - Postponed
-        txt += f"<code>{away_team}{nhl.ico['vs']}{home_team} " \
-               f"{nhl.ico['tbd']} {game['status']['detailedState']}</code>\n"
+        txt_game_status = f"{nhl.ico['tbd']} <b>{game['status']['detailedState']}</b>"
     # Other
     else:
-        txt += f"<code>{away_team}{nhl.ico['vs']}{home_team}</code>\n"
+        txt_game_status = ""
+
+    #-- Формирование текста вывода информации о матче -----
+    txt = f"{nhl.ico['schedule']} <b>{schedule.get_game_time_tz_text(game['datetime']['dateTime'], withDate=True, withTZ=True)}:</b>\n"
+    txt += f"\n{txt_game_status}\n"
+    txt += f"{txt_team_away_score} <b>{team_away}</b> {team_away_w_l_o}\n"
+    txt += f"{txt_team_home_score} <b>{team_home}</b> {team_home_w_l_o}\n"
+    txt += f"\n{txt_game_summary}\n"
+    txt += f"\n{txt_game_details}\n"
 
     return txt
 
@@ -69,7 +84,7 @@ def game_plays_details_text(plays, type_plays: str):
 
     match type_plays:
         case 'scoringPlays': # Изменение счёта
-            txt += f"\n{nhl.ico['scores']}{nhl.ico['goal']} <b>Scoring:</b>\n"
+            txt += f"{nhl.ico['scores']}{nhl.ico['goal']} <b>Scoring:</b>\n"
 
             for idx_play in list_plays:
                 score = all_plays[idx_play]
@@ -86,7 +101,7 @@ def game_plays_details_text(plays, type_plays: str):
                 txt += f"\n<b>{score_teams}</b> ({score_team}) ({score_time}) {nhl.ico['goal']} {score_strength}{score_players}\n"
 
         case 'penaltyPlays': # Нарушения
-            txt += f"\n{nhl.ico['penalty']} <b>Penalties:</b>\n"
+            txt += f"{nhl.ico['penalty']} <b>Penalties:</b>\n"
 
             for idx_play in list_plays:
                 penalty = all_plays[idx_play]
@@ -112,21 +127,17 @@ def game_summary_text(data):
     team_away_stats_pp = f"{int(team_away_stats['powerPlayGoals'])}/{int(team_away_stats['powerPlayOpportunities'])}"
     team_home_stats_pp = f"{int(team_home_stats['powerPlayGoals'])}/{int(team_home_stats['powerPlayOpportunities'])}"
 
-    # -- Статистика команд на момент матча -------
-    teams_leagueRecords = schedule.get_schedule_data_by_dame_for_leagueRecords(data['gameData']['game']['pk'])['dates'][0]['games'][0]['teams']
-    team_away_record = f"({teams_leagueRecords['away']['leagueRecord']['wins']}-{teams_leagueRecords['away']['leagueRecord']['losses']}-{teams_leagueRecords['away']['leagueRecord']['ot']})"
-    team_home_record = f"({teams_leagueRecords['home']['leagueRecord']['wins']}-{teams_leagueRecords['home']['leagueRecord']['losses']}-{teams_leagueRecords['home']['leagueRecord']['ot']})"
-    # --------------------------------------------
+    widht_1st_field = len(team_away_name)
 
-    n = len(team_away_name)
-    txt = '<code>'
-    txt += f"{team_away_name}         {team_home_name}\n" \
-           f"{team_away_record.rjust(n)}         {team_home_record}\n" \
-           f"{schedule.get_game_team_score_text(team_away_stats['goals'], hideScore=False).rjust(n+1)}  Goals  {schedule.get_game_team_score_text(team_home_stats['goals'], hideScore=False)}\n" \
-           f"{str(team_away_stats['shots']).rjust(n)}| Shots |{team_home_stats['shots']}\n" \
-           f"{str(team_away_stats['hits']).rjust(n)}| Hits  |{team_home_stats['hits']}\n" \
-           f"{str(team_away_stats['pim']).rjust(n)}| PIM   |{team_home_stats['pim']}\n" \
-           f"{team_away_stats_pp.rjust(n)}| PP    |{team_home_stats_pp}\n"
+    txt = "<b>Game Summary:</b>\n"
+    txt += '<code>'
+    txt += f"{team_away_name} |  vs   | {team_home_name}\n" \
+           f"{str(team_away_stats['goals']).rjust(widht_1st_field)} | Goals | {team_home_stats['goals']}\n" \
+           f"{str(team_away_stats['shots']).rjust(widht_1st_field)} | Shots | {team_home_stats['shots']}\n" \
+           f"{str(team_away_stats['hits']).rjust(widht_1st_field)} | Hits  | {team_home_stats['hits']}\n" \
+           f"{str(team_away_stats['pim']).rjust(widht_1st_field)} | PIM   | {team_home_stats['pim']}\n" \
+           f"{team_away_stats_pp.rjust(widht_1st_field)} | PP    | {team_home_stats_pp}"
+    txt += '</code>'
 
-    return txt + '</code>'
+    return txt
 

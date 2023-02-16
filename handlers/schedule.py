@@ -10,7 +10,7 @@ async def command_scores(message: types.Message):
     data = schedule.get_scores()
     day = schedule.get_correct_date_from_data(data)
 
-    await message.answer(f"{nhl.ico['scores']} <b>Scores:</b>\n{schedule.get_scores_text(data)}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['scores']} <b>Scores:</b>\n{schedule.get_scores_text(data, hideScore=nhl.hide_score)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_scores(day))
 
 
@@ -27,7 +27,7 @@ async def command_schedule_details_day(callback : types.CallbackQuery):
 
 async def command_schedule(message: types.Message):
     dates = schedule.get_schedule_dates_for_inlinemenu()
-    await message.answer(f"{nhl.ico['schedule']} <b>Schedule:</b>\n{schedule.get_schedule_day_text()}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['schedule']} <b>Schedule:</b>\n{schedule.get_schedule_day_text(hideScore=nhl.hide_score)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_schedule(dates))
 
 
@@ -36,7 +36,7 @@ async def command_schedule_day(callback : types.CallbackQuery):
     day = callback_data_parts[2]
 
     dates = schedule.get_schedule_dates_for_inlinemenu(day)
-    await callback.message.answer(f"{nhl.ico['schedule']} <b>Schedule:</b>\n{schedule.get_schedule_day_text(day=day)}", parse_mode="HTML",
+    await callback.message.answer(f"{nhl.ico['schedule']} <b>Schedule:</b>\n{schedule.get_schedule_day_text(day=day, hideScore=nhl.hide_score)}", parse_mode="HTML",
                                   reply_markup=keyboards.keyboard_schedule(dates))
     await callback.answer()
 

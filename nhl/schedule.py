@@ -53,12 +53,12 @@ def get_schedule_day_games_for_inlinemenu(day=None, data=None):
 
             # Live
             elif int(game['status']['statusCode']) < 5:  # 3 - Live/In Progress; 4 - Live/In Progress - Critical
-                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {nhl.ico['live']} " \
+                txt = f"{get_game_teams_score_text(game['teams'], as_code=False)} - {nhl.ico['live']} " \
                       f"{game['linescore']['currentPeriodOrdinal']}/{game['linescore']['currentPeriodTimeRemaining']}"
 
             # Final
             elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
-                txt = f"{get_game_teams_score_text(game['teams'], hideScore=False, as_code=False)} - {nhl.ico['finished']} " \
+                txt = f"{get_game_teams_score_text(game['teams'], as_code=False)} - {nhl.ico['finished']} " \
                       f"{'' if game['linescore']['currentPeriod'] == 3 else game['linescore']['currentPeriodOrdinal']}"
 
             # TBD/Postponed
@@ -87,7 +87,7 @@ def get_schedule_day_data(day=None):
 
 
 # Формирование теста для вывода расписания на день ('%Y-%m-%d')
-def get_schedule_day_text(day=None, data=None, hideScore=True):
+def get_schedule_day_text(day=None, data=None, hideScore=False):
     data = get_schedule_day_data(day) if (data == None) else data
 
     txt = get_schedule_days_text(data, hideScore=hideScore)
@@ -96,7 +96,7 @@ def get_schedule_day_text(day=None, data=None, hideScore=True):
 
 
 # Формирование теста для вывода расписания
-def get_schedule_days_text(data, hideScore=True):
+def get_schedule_days_text(data, hideScore=False):
 
     txt = ""
     for date_day in data['dates']:
@@ -133,7 +133,7 @@ def get_schedule_days_text(data, hideScore=True):
 
 
 # Формирование теста для вывода сведений об игре
-def get_schedule_day_game_text(game, withHeader=False, hideScore=True):
+def get_schedule_day_game_text(game, withHeader=False, hideScore=False):
 
     txt = f"{nhl.ico['schedule']} <b>{get_game_time_tz_text(game['gameDate'], withDate=True, withTZ=True)}:</b>\n" if (withHeader) else ''
 
@@ -172,7 +172,7 @@ def get_schedule_day_game_text(game, withHeader=False, hideScore=True):
     return txt
 
 
-def get_game_teams_score_text(game_teams, hideScore=True, as_code=True):
+def get_game_teams_score_text(game_teams, hideScore=False, as_code=True):
 
     away_team = f"<code>{game_teams['away']['team']['abbreviation']}</code>" if (as_code) else game_teams['away']['team']['abbreviation']
     away_team_score = game_teams['away']['score']
@@ -185,7 +185,7 @@ def get_game_teams_score_text(game_teams, hideScore=True, as_code=True):
     return game_teams_score
 
 
-def get_game_team_score_text(game_team_score, emoji=True, hideScore=True):
+def get_game_team_score_text(game_team_score, emoji=True, hideScore=False):
 
     if emoji:
         game_team_score = emojize(f":keycap_{game_team_score}:") if (game_team_score <= 10) else emojize(f":keycap_{game_team_score//10}::keycap_{game_team_score%10}:")
@@ -206,7 +206,7 @@ def get_scores():
 
 
 # Формирование теста для вывода текущих результатов матчей
-def get_scores_text(data=None, details=False, hideScore=True):
+def get_scores_text(data=None, hideScore=True):
     data = get_scores() if (data==None) else data
 
     txt = get_schedule_days_text(data, hideScore=hideScore)
