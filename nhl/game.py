@@ -47,7 +47,7 @@ def get_game_text(game_id, details='scoringPlays'):
         txt_team_away_score = schedule.get_game_team_score_text(team_away_score)
         txt_team_home_score = schedule.get_game_team_score_text(team_home_score)
         txt_game_summary = game_summary_text(data)
-        txt_game_details = f"{game_plays_details_text(live['plays'], details)}"
+        txt_game_details = f"{game_details_text(data, details)}"
 
     # Final
     elif int(game['status']['statusCode']) < 8:  # 5 - Final/Game Over; 6 - Final; 7 - Final
@@ -55,7 +55,7 @@ def get_game_text(game_id, details='scoringPlays'):
         txt_team_away_score = schedule.get_game_team_score_text(team_away_score)
         txt_team_home_score = schedule.get_game_team_score_text(team_home_score)
         txt_game_summary = game_summary_text(data)
-        txt_game_details = f"{game_plays_details_text(live['plays'], details)}"
+        txt_game_details = f"{game_details_text(data, details)}"
 
     # TBD/Postponed
     elif int(game['status']['statusCode']) < 10:  # 8 - Scheduled (Time TBD); 9 - Postponed
@@ -76,14 +76,14 @@ def get_game_text(game_id, details='scoringPlays'):
 
 
 # Формирование теста для детального вывода информации по определенному виду событий (scoringPlays, penaltyPlays)
-def game_plays_details_text(plays, type_plays: str):
-    all_plays = plays['allPlays']
-    list_plays = plays[type_plays]
-
+def game_details_text(data, type_details: str):
     txt = ''
 
-    match type_plays:
+    match type_details:
         case 'scoringPlays': # Изменение счёта
+            all_plays = data['liveData']['plays']['allPlays']
+            list_plays = data['liveData']['plays'][type_details]
+
             txt += f"{nhl.ico['scores']}{nhl.ico['goal']} <b>Scoring:</b>\n"
 
             for idx_play in list_plays:
@@ -101,6 +101,9 @@ def game_plays_details_text(plays, type_plays: str):
                 txt += f"\n<b>{score_teams}</b> ({score_team}) ({score_time}) {nhl.ico['goal']} {score_strength}{score_players}\n"
 
         case 'penaltyPlays': # Нарушения
+            all_plays = data['liveData']['plays']['allPlays']
+            list_plays = data['liveData']['plays'][type_details]
+
             txt += f"{nhl.ico['penalty']} <b>Penalties:</b>\n"
 
             for idx_play in list_plays:
@@ -112,6 +115,10 @@ def game_plays_details_text(plays, type_plays: str):
                 penalty_desc = penalty['result']['description']  # Описание нарушения
 
                 txt += f"\n<b>{penalty_time}</b> ({penalty_team}) ({penalty_minutes} min.) {nhl.ico['penalty']} {penalty_desc}\n"
+
+        case 'teamsStats':  # Статистика игроков команд
+            txt += f"<b>Team Stats:</b>\n"
+            txt += game_teams_stats_text(data)
 
     return txt
 
@@ -138,6 +145,54 @@ def game_summary_text(data):
            f"{str(team_away_stats['pim']).rjust(widht_1st_field)} | PIM   | {team_home_stats['pim']}\n" \
            f"{team_away_stats_pp.rjust(widht_1st_field)} | PP    | {team_home_stats_pp}"
     txt += '</code>'
+
+    return txt
+
+
+# Формирование теста для вывода статистики игроков
+def game_teams_stats_text(data):
+    all_players = data['gameData']['players']
+    teams = data['liveData']['boxscore']['teams']
+
+    txt = ''
+    for key, team in teams.items():
+        team_name = team['team']['name']
+        team_players = team['players']
+        team_goalies = team['goalies']
+        team_skaters = team['skaters']
+
+        players_by_positions = {'Forwards': [], 'Defense': [], 'Goalies': []}
+
+        for skater in team_skaters:
+            player_id = f"ID{skater}"
+            player_stats = team_players[player_id]['stats']['skaterStats']
+
+            player_number = team_players[player_id]['jerseyNumber']
+            player_name = f"{all_players[player_id]['firstName'][0]}. {all_players[player_id]['lastName']}"
+            playr_goals = player_stats['goals']
+            playr_assists = player_stats['assists']
+            playr_p_m = player_stats['plusMinus']
+            playr_shots = player_stats['shots']
+            playr_pim = player_stats['penaltyMinutes']
+            playr_toi = player_stats['timeOnIce']
+
+            player_txt = f"{player_number.rjust(2)}|" \
+                         f"{player_name.ljust(20)}|" \
+                         f"{playr_goals}|" \
+                         f"{playr_assists}|" \
+                         f"{str(playr_p_m).rjust(2)}|" \
+                         f"{str(playr_shots).rjust(2)}|" \
+                         f"{str(playr_pim).rjust(3)}|" \
+                         f"{playr_toi}"
+
+            player_pos_type = 'Defense' if (team_players[player_id]['position']['type']=='Defenseman') else f"{team_players[player_id]['position']['type']}s"
+            players_by_positions[player_pos_type].append(player_txt)
+
+        txt += f"\n<b>{team_name}</b>\n"
+        for players_pos, players in players_by_positions.items():
+            txt += f" #|{players_pos.center(20, '_')}|G|A|+-| S|PIM|TOI\n"
+            for player in players:
+                txt += f"{player}\n"
 
     return txt
 
