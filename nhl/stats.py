@@ -201,9 +201,9 @@ def get_stats_defensemen_text_fromData(data, full=False):
     txt = "<pre>"
 
     if (full):
-        txt += f"\n #|{'Defensemens'.center(21, '_')}|{skater_stats[data['stata']]}\n"
+        txt += f"\n #|{'Defensemen'.center(21, '_')}|{skater_stats[data['stata']]}\n"
     else:
-        txt += f"\n #|{'Defensemens'.center(21, '_')}|{skater_stats[data['stata']]}\n"
+        txt += f"\n #|{'Defensemen'.center(21, '_')}|{skater_stats[data['stata']]}\n"
 
     n = 0
     for player in data['data']:

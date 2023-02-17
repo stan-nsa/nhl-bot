@@ -154,21 +154,28 @@ def game_teams_stats_text(data):
     all_players = data['gameData']['players']
     teams = data['liveData']['boxscore']['teams']
 
+    width_player_name = 15 # Ширина поля имени игрока
+
     txt = ''
     for key, team in teams.items():
         team_name = team['team']['name']
         team_players = team['players']
         team_goalies = team['goalies']
         team_skaters = team['skaters']
+        team_scratches = team['scratches']
 
         players_by_positions = {'Forwards': [], 'Defense': [], 'Goalies': []}
 
         for skater in team_skaters:
+            if skater in team_scratches:
+                continue
+
             player_id = f"ID{skater}"
             player_stats = team_players[player_id]['stats']['skaterStats']
 
             player_number = team_players[player_id]['jerseyNumber']
-            player_name = f"{all_players[player_id]['firstName'][0]}. {all_players[player_id]['lastName']}"
+            player_name = f"{all_players[player_id]['firstName'][0]}.{all_players[player_id]['lastName']}"
+            player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name-3]}..."
             playr_goals = player_stats['goals']
             playr_assists = player_stats['assists']
             playr_p_m = player_stats['plusMinus']
@@ -177,22 +184,52 @@ def game_teams_stats_text(data):
             playr_toi = player_stats['timeOnIce']
 
             player_txt = f"{player_number.rjust(2)}|" \
-                         f"{player_name.ljust(20)}|" \
+                         f"{player_name.ljust(width_player_name)}|" \
                          f"{playr_goals}|" \
                          f"{playr_assists}|" \
                          f"{str(playr_p_m).rjust(2)}|" \
                          f"{str(playr_shots).rjust(2)}|" \
-                         f"{str(playr_pim).rjust(3)}|" \
+                         f"{str(playr_pim).rjust(2)}|" \
                          f"{playr_toi}"
 
             player_pos_type = 'Defense' if (team_players[player_id]['position']['type']=='Defenseman') else f"{team_players[player_id]['position']['type']}s"
             players_by_positions[player_pos_type].append(player_txt)
 
+        for goalie in team_goalies:
+            if goalie in team_scratches:
+                continue
+
+            player_id = f"ID{goalie}"
+            player_stats = team_players[player_id]['stats']['goalieStats']
+
+            player_number = team_players[player_id]['jerseyNumber']
+            player_name = f"{all_players[player_id]['firstName'][0]}.{all_players[player_id]['lastName']}"
+            player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name-3]}..."
+            playr_saves = player_stats['saves']
+            playr_shots = player_stats['shots']
+            playr_savePercentage = (player_stats['savePercentage'] if ('savePercentage' in player_stats.keys()) else 0) / 100
+            playr_toi = player_stats['timeOnIce']
+
+            player_txt = f"{player_number.rjust(2)}|" \
+                         f"{player_name.ljust(width_player_name)}|" \
+                         f"{str(playr_saves).rjust(2)}|" \
+                         f"{str(playr_shots).rjust(2)}|" \
+                         f"{str(round(playr_savePercentage, 3)).rjust(5)}|" \
+                         f"{playr_toi}"
+
+            players_by_positions['Goalies'].append(player_txt)
+
         txt += f"\n<b>{team_name}</b>\n"
+        txt += "<code>"
         for players_pos, players in players_by_positions.items():
-            txt += f" #|{players_pos.center(20, '_')}|G|A|+-| S|PIM|TOI\n"
+            if (players_pos == 'Goalies'):
+                txt += f"_#|{players_pos.center(width_player_name, '_')}|Sv|S_|_Sv%_|_TOI_\n"
+            else:
+                txt += f"_#|{players_pos.center(width_player_name, '_')}|G|A|+-|S_|PM|_TOI_\n"
             for player in players:
                 txt += f"{player}\n"
+
+        txt += "</code>"
 
     return txt
 
