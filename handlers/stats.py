@@ -45,7 +45,7 @@ from nhl import keyboards
 
 #-- Leaders ---------------------------------------------------------------------------------------
 async def command_stats(message: types.Message):
-    await message.answer("<b>Статистики игроков - лидеры:</b>", parse_mode="HTML")
+    await message.answer(f"{nhl.ico['stats']}<b>Players Stats - Leaders:</b>", parse_mode="HTML")
     await command_stats_skaters(message)
     await command_stats_goalies(message)
     await command_stats_defensemen(message)
@@ -54,70 +54,70 @@ async def command_stats(message: types.Message):
 
 #-- Skaters ---------------------------------------------------------------------------------------
 async def command_stats_skaters(message: types.Message):
-    await message.answer(f"<b>Статистика игроков:</b>\n{stats.get_stats_skaters_byProperty_text(property='points', full=False)}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Skaters Stats:</b>\n{stats.get_stats_skaters_byProperty_text(property='points', full=False)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_stats_skaters())
 
 
 async def command_stats_skaters_kb(callback : types.CallbackQuery):
     stata = callback.data.split('_')[2]
     await callback.message.answer(
-        f"<b>Статистика игроков:</b>\n{stats.get_stats_skaters_byProperty_text(property=stata, full=False)}", parse_mode="HTML",
+        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Skaters Stats:</b>\n{stats.get_stats_skaters_byProperty_text(property=stata, full=False)}", parse_mode="HTML",
         reply_markup=keyboards.keyboard_stats_skaters())
     await callback.answer()
 
 
 #-- Goalies ---------------------------------------------------------------------------------------
 async def command_stats_goalies(message: types.Message):
-    await message.answer(f"<b>Статистика вратарей:</b>\n{stats.get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=False)}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['goalie']}{nhl.ico['stats']}<b>Goalies Stats:</b>\n{stats.get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=False)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_stats_goalies())
 
 
 async def command_stats_goalies_kb(callback : types.CallbackQuery):
     stata = callback.data.split('_')[2:]
     await callback.message.answer(
-        f"<b>Статистика вратарей:</b>\n{stats.get_stats_goalies_byProperty_text(property=stata[0], direction=stata[1], full=False)}", parse_mode="HTML",
+        f"{nhl.ico['goalie']}{nhl.ico['stats']}<b>Goalies Stats:</b>\n{stats.get_stats_goalies_byProperty_text(property=stata[0], direction=stata[1], full=False)}", parse_mode="HTML",
         reply_markup=keyboards.keyboard_stats_goalies())
     await callback.answer()
 
 
 #-- Defensemen ------------------------------------------------------------------------------------
 async def command_stats_defensemen(message: types.Message):
-    await message.answer(f"<b>Статистика защитников:</b>\n{stats.get_stats_defensemen_byProperty_text(property='points', full=False)}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Defensemen Stats:</b>\n{stats.get_stats_defensemen_byProperty_text(property='points', full=False)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_stats_defensemen())
 
 
 async def command_stats_defensemen_kb(callback : types.CallbackQuery):
     stata = callback.data.split('_')[2]
     await callback.message.answer(
-        f"<b>Статистика защитников:</b>\n{stats.get_stats_defensemen_byProperty_text(property=stata, full=False)}", parse_mode="HTML",
+        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Defensemen Stats:</b>\n{stats.get_stats_defensemen_byProperty_text(property=stata, full=False)}", parse_mode="HTML",
         reply_markup=keyboards.keyboard_stats_defensemen())
     await callback.answer()
 
 
 #-- Rookies ---------------------------------------------------------------------------------------
 async def command_stats_rookies(message: types.Message):
-    await message.answer(f"<b>Статистика новичков:</b>\n{stats.get_stats_rookies_byProperty_text(property='points', full=False)}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Rookies Stats:</b>\n{stats.get_stats_rookies_byProperty_text(property='points', full=False)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_stats_rookies())
 
 
 async def command_stats_rookies_kb(callback : types.CallbackQuery):
     stata = callback.data.split('_')[2]
     await callback.message.answer(
-        f"<b>Статистика новичков:</b>\n{stats.get_stats_rookies_byProperty_text(property=stata, full=False)}", parse_mode="HTML",
+        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Rookies Stats:</b>\n{stats.get_stats_rookies_byProperty_text(property=stata, full=False)}", parse_mode="HTML",
         reply_markup=keyboards.keyboard_stats_rookies())
     await callback.answer()
 
 
 #-- Teams -----------------------------------------------------------------------------------------
 async def command_stats_teams(message: types.Message):
-    await message.answer(f"<b>Статистика команд:</b>\n{stats.get_stats_teams_byProperty_text(property='wins', full=False)}", parse_mode="HTML",
+    await message.answer(f"{nhl.ico['stats']}<b>Teams Stats:</b>\n{stats.get_stats_teams_byProperty_text(property='wins', full=False)}", parse_mode="HTML",
                          reply_markup=keyboards.keyboard_stats_teams())
 
 
 async def command_stats_teams_kb(callback : types.CallbackQuery):
     stata = callback.data.split('_')[2:]
     await callback.message.answer(
-        f"<b>Статистика команд:</b>\n{stats.get_stats_teams_byProperty_text(property=stata[0], direction=stata[1], full=False)}", parse_mode="HTML",
+        f"{nhl.ico['stats']}<b>Teams Stats:</b>\n{stats.get_stats_teams_byProperty_text(property=stata[0], direction=stata[1], full=False)}", parse_mode="HTML",
         reply_markup=keyboards.keyboard_stats_teams())
     await callback.answer()
 

@@ -34,7 +34,7 @@ ico = {
     'scores': emojize(':goal_net::ice_hockey:'),
     'time': emojize(':alarm_clock:'),
     'standings': emojize(':trophy:'),
-    'stats': emojize(':alarm_clock:'),
+    'stats': emojize(':bar_chart:'),
 
     'scheduled': emojize(':calendar:'),
     'live': emojize(':green_circle:'),
