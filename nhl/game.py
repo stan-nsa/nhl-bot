@@ -123,7 +123,7 @@ def game_details_text(data, type_details: str):
     return txt
 
 
-# Формирование теста для вывода итоговой информации
+# Формирование теста для вывода итоговой информации о матче
 def game_summary_text(data):
     team_away_name = data['gameData']['teams']['away']['teamName']
     team_home_name = data['gameData']['teams']['home']['teamName']
@@ -164,8 +164,9 @@ def game_teams_stats_text(data):
         team_skaters = team['skaters']
         team_scratches = team['scratches']
 
-        players_by_positions = {'Forwards': [], 'Defense': [], 'Goalies': []}
+        players_by_positions = {'Forwards': [], 'Defense': [], 'Goalies': []} # Массив строк статистики игроков, разбитый по игровым позициям
 
+        # Формирование текста статистики полевых
         for skater in team_skaters:
             if skater in team_scratches:
                 continue
@@ -173,6 +174,7 @@ def game_teams_stats_text(data):
             player_id = f"ID{skater}"
             player_stats = team_players[player_id]['stats']['skaterStats']
 
+            # Данные статистики полевых
             player_number = team_players[player_id]['jerseyNumber']
             player_name = f"{all_players[player_id]['firstName'][0]}.{all_players[player_id]['lastName']}"
             player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name-3]}..."
@@ -183,6 +185,7 @@ def game_teams_stats_text(data):
             playr_pim = player_stats['penaltyMinutes']
             playr_toi = player_stats['timeOnIce']
 
+            # Строка статистики полевых
             player_txt = f"{player_number.rjust(2)}|" \
                          f"{player_name.ljust(width_player_name)}|" \
                          f"{playr_goals}|" \
@@ -195,6 +198,7 @@ def game_teams_stats_text(data):
             player_pos_type = 'Defense' if (team_players[player_id]['position']['type']=='Defenseman') else f"{team_players[player_id]['position']['type']}s"
             players_by_positions[player_pos_type].append(player_txt)
 
+        # Формирование текста статистики вратарей
         for goalie in team_goalies:
             if goalie in team_scratches:
                 continue
@@ -202,6 +206,7 @@ def game_teams_stats_text(data):
             player_id = f"ID{goalie}"
             player_stats = team_players[player_id]['stats']['goalieStats']
 
+            # Данные статистики вратарей
             player_number = team_players[player_id]['jerseyNumber']
             player_name = f"{all_players[player_id]['firstName'][0]}.{all_players[player_id]['lastName']}"
             player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name-3]}..."
@@ -210,6 +215,7 @@ def game_teams_stats_text(data):
             playr_savePercentage = (player_stats['savePercentage'] if ('savePercentage' in player_stats.keys()) else 0) / 100
             playr_toi = player_stats['timeOnIce']
 
+            # Строка статистики вратарей
             player_txt = f"{player_number.rjust(2)}|" \
                          f"{player_name.ljust(width_player_name)}|" \
                          f"{str(playr_saves).rjust(2)}|" \
@@ -219,13 +225,15 @@ def game_teams_stats_text(data):
 
             players_by_positions['Goalies'].append(player_txt)
 
+        # Формирование окончательного текста статистики нападающих, защитников и вратарей
         txt += f"\n<b>{team_name}</b>\n"
         txt += "<code>"
         for players_pos, players in players_by_positions.items():
             if (players_pos == 'Goalies'):
-                txt += f"_#|{players_pos.center(width_player_name, '_')}|Sv|S_|_Sv%_|_TOI_\n"
+                txt += f"_#|{players_pos.center(width_player_name, '_')}|Sv|S_|_Sv%_|_TOI_\n" # Шапка таблицы статистики вратарей
             else:
-                txt += f"_#|{players_pos.center(width_player_name, '_')}|G|A|+-|S_|PM|_TOI_\n"
+                txt += f"_#|{players_pos.center(width_player_name, '_')}|G|A|+-|S_|PM|_TOI_\n" # Шапка таблицы статистики полевых
+
             for player in players:
                 txt += f"{player}\n"
 
