@@ -24,7 +24,7 @@ def keyboard_schedule_details(games):
     kb = InlineKeyboardMarkup()
 
     for game in games:
-        kb.add(InlineKeyboardButton(game['text'], callback_data=f"Game_Details_{game['id']}_scoringPlays"))
+        kb.add(InlineKeyboardButton(game['text'], callback_data=f"Game_Details_{game['id']}"))
 
     return kb
 
