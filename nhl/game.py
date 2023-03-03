@@ -138,12 +138,13 @@ def game_summary_text(data):
 
     txt = "<b>Game Summary:</b>\n"
     txt += '<code>'
-    txt += f"{team_away_name} |  vs   | {team_home_name}\n" \
-           f"{str(team_away_stats['goals']).rjust(widht_1st_field)} | Goals | {team_home_stats['goals']}\n" \
-           f"{str(team_away_stats['shots']).rjust(widht_1st_field)} | Shots | {team_home_stats['shots']}\n" \
-           f"{str(team_away_stats['hits']).rjust(widht_1st_field)} | Hits  | {team_home_stats['hits']}\n" \
-           f"{str(team_away_stats['pim']).rjust(widht_1st_field)} | PIM   | {team_home_stats['pim']}\n" \
-           f"{team_away_stats_pp.rjust(widht_1st_field)} | PP    | {team_home_stats_pp}"
+    txt += f"{team_away_name} |   vs   | {team_home_name}\n" \
+           f"{str(team_away_stats['goals']).rjust(widht_1st_field)} | Goals  | {team_home_stats['goals']}\n" \
+           f"{str(team_away_stats['shots']).rjust(widht_1st_field)} | Shots  | {team_home_stats['shots']}\n" \
+           f"{str(team_away_stats['blocked']).rjust(widht_1st_field)} | Blocks | {team_home_stats['blocked']}\n" \
+           f"{str(team_away_stats['hits']).rjust(widht_1st_field)} |  Hits  | {team_home_stats['hits']}\n" \
+           f"{str(team_away_stats['pim']).rjust(widht_1st_field)} |  PIM   | {team_home_stats['pim']}\n" \
+           f"{team_away_stats_pp.rjust(widht_1st_field)} |  PP    | {team_home_stats_pp}"
     txt += '</code>'
 
     return txt

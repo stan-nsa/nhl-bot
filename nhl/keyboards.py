@@ -15,7 +15,7 @@ def keyboard_schedule(dates=None, day=None): # dates = {'day': '', 'previous': '
                                         InlineKeyboardButton(f"{ico['info']} Details", callback_data=f"Schedule_Details_day_{dates['day']}"),
                                         InlineKeyboardButton(f"{ico['next']} {dates['next']}", callback_data=f"Schedule_day_{dates['next']}"))
     else:
-        kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['info']} Details", callback_data=f"Schedule_Details_day_{day}"))
+        kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['info']} Details", callback_data=f"Scores_Details_day_{day}"))
 
     return kb
 
@@ -31,7 +31,7 @@ def keyboard_schedule_details(games):
 
 #-- Keyboard for Game -----------------------------------------------------------------------------
 def keyboard_game_details(game_id):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['scores']}{ico['goal']}Scores", callback_data=f"Game_Details_{game_id}_scoringPlays"),
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['stick']}{ico['goal']}Scoring", callback_data=f"Game_Details_{game_id}_scoringPlays"),
                                     InlineKeyboardButton(f"{ico['penalty']}Penalties", callback_data=f"Game_Details_{game_id}_penaltyPlays"),
                                     InlineKeyboardButton(f"{ico['stats']}Teams Stats", callback_data=f"Game_Details_{game_id}_teamsStats"))
 

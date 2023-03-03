@@ -19,10 +19,13 @@ async def command_game_details(callback : types.CallbackQuery):
 
     else:
         details = callback_data_parts[3]
-        await callback.message.edit_text(
-            f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
-            reply_markup=keyboards.keyboard_game_details(game_id))
-        await callback.answer(f"Game: {game_id} updated!")
+        try:
+            await callback.message.edit_text(
+                f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
+                reply_markup=keyboards.keyboard_game_details(game_id))
+            await callback.answer(f"Game: {game_id} updated!")
+        except:
+            await callback.answer()
 
 
 def register_handlers_game(dp: Dispatcher):
