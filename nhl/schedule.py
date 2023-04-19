@@ -69,6 +69,9 @@ def get_schedule_day_games_for_inlinemenu(day=None, data=None):
             else:
                 txt = f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']}"
 
+            # Play-off series Summary
+            txt += f" ({game['seriesSummary']['gameLabel']}, {game['seriesSummary']['seriesStatusShort']})" if (game['gameType'] == "P") else ""
+
             games.append({'id': game['gamePk'], 'text': txt})
 
     return games
@@ -77,7 +80,7 @@ def get_schedule_day_games_for_inlinemenu(day=None, data=None):
 # Получение от сервера данных расписания на день ('%Y-%m-%d')
 def get_schedule_day_data(day=None):
 
-    schedule_str = "/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays"
+    schedule_str = "/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.seriesSummary"
 
     schedule_str += f"&date={day}" if (day != None) else ''
 
@@ -261,7 +264,7 @@ def get_correct_date_from_data(data, as_str=True):
     return day
 
 def get_schedule_data_by_dame_for_leagueRecords(game_id: str):
-    schedule_str = f"/schedule?expand=schedule.leagueRecord&gamePk={game_id}"
+    schedule_str = f"/schedule?expand=schedule.leagueRecord,schedule.game.seriesSummary&gamePk={game_id}"
 
     data = nhl.get_request_nhl_api(schedule_str)
 

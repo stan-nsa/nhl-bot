@@ -32,10 +32,18 @@ def get_game_text(game_id, details='scoringPlays'):
     team_away_score = live['linescore']['teams']['away']['goals']
     team_home_score = live['linescore']['teams']['home']['goals']
 
+    schedule_expand_data = schedule.get_schedule_data_by_dame_for_leagueRecords(game_id)
+
     #-- Статистика команд на момент матча: (wins-losses-ot) --
-    teams_leagueRecords = schedule.get_schedule_data_by_dame_for_leagueRecords(game_id)['dates'][0]['games'][0]['teams']
-    team_away_w_l_o = f"({teams_leagueRecords['away']['leagueRecord']['wins']}-{teams_leagueRecords['away']['leagueRecord']['losses']}-{teams_leagueRecords['away']['leagueRecord']['ot']})"
-    team_home_w_l_o = f"({teams_leagueRecords['home']['leagueRecord']['wins']}-{teams_leagueRecords['home']['leagueRecord']['losses']}-{teams_leagueRecords['home']['leagueRecord']['ot']})"
+    teams_leagueRecords = schedule_expand_data['dates'][0]['games'][0]['teams']
+    team_away_w_l_o = f"({teams_leagueRecords['away']['leagueRecord']['wins']}-{teams_leagueRecords['away']['leagueRecord']['losses']}" + \
+                      (f"-{teams_leagueRecords['away']['leagueRecord']['ot']})" if (game['game']['type'] == "R") else f")")
+    team_home_w_l_o = f"({teams_leagueRecords['home']['leagueRecord']['wins']}-{teams_leagueRecords['home']['leagueRecord']['losses']}" + \
+                      (f"-{teams_leagueRecords['home']['leagueRecord']['ot']})" if (game['game']['type'] == "R") else f")")
+
+    # -- Информация о текущей серии ПО (Game #, Team lead) --
+    series_summary = f"({schedule_expand_data['dates'][0]['games'][0]['seriesSummary']['gameLabel']}, " \
+                     f"{schedule_expand_data['dates'][0]['games'][0]['seriesSummary']['seriesStatus']})\n" if (game['game']['type'] == "P") else ""
     # --------------------------------------------------------
 
     # Scheduled
@@ -69,6 +77,7 @@ def get_game_text(game_id, details='scoringPlays'):
     txt += f"\n{txt_game_status}\n"
     txt += f"{txt_team_away_score} <b>{team_away}</b> {team_away_w_l_o}\n"
     txt += f"{txt_team_home_score} <b>{team_home}</b> {team_home_w_l_o}\n"
+    txt += series_summary
     txt += f"\n{txt_game_summary}\n"
     txt += f"\n{txt_game_details}\n"
 
