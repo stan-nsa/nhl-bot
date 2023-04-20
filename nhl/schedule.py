@@ -70,7 +70,7 @@ def get_schedule_day_games_for_inlinemenu(day=None, data=None):
                 txt = f"{game['teams']['away']['team']['abbreviation']}{nhl.ico['vs']}{game['teams']['home']['team']['abbreviation']}"
 
             # Play-off series Summary
-            txt += f" ({game['seriesSummary']['gameLabel']}, {game['seriesSummary']['seriesStatusShort']})" if (game['gameType'] == "P") else ""
+            txt += f" ({game['seriesSummary']['gameLabel'].replace('ame ', '#')} {game['seriesSummary']['seriesStatusShort']})" if (game['gameType'] == "P") else ""
 
             games.append({'id': game['gamePk'], 'text': txt})
 
