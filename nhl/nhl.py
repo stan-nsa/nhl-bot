@@ -25,7 +25,7 @@ proxies = {
     'https': 'socks5://puser:8888@rkn-pnh.hopto.org:8888'
 }
 
-#proxies = None
+proxies = None
 
 # Иконки/значки для статусов и визуализации информации
 ico = {
