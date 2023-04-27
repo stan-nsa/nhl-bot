@@ -48,43 +48,57 @@ def keyboard_standings():
 
 
 #-- Keyboard for Stats ----------------------------------------------------------------------------
-def keyboard_stats_goalies():
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("GGA", callback_data="stats_goalies_goalsAgainstAverage_ASC"),
-                                    InlineKeyboardButton("Save %", callback_data="stats_goalies_savePct_DESC"),
-                                    InlineKeyboardButton("Shutouts", callback_data="stats_goalies_shutouts_DESC"),
-                                    InlineKeyboardButton("Wins", callback_data="stats_goalies_wins_DESC"))
+def keyboard_stats_gameType():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Regular season", callback_data="stats_leaders_regular"),
+                                    InlineKeyboardButton("PlayOffs", callback_data="stats_leaders_playoff"))
 
     return kb
 
 
-def keyboard_stats_skaters():
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data="stats_skaters_points"),
-                                    InlineKeyboardButton("Goals", callback_data="stats_skaters_goals"),
-                                    InlineKeyboardButton("Assists", callback_data="stats_skaters_assists"))
+def keyboard_stats_goalies(gameType='regular'):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("GGA", callback_data=f"stats_goalies_goalsAgainstAverage_ASC_{gameType}"),
+                                    InlineKeyboardButton("Save %", callback_data=f"stats_goalies_savePct_DESC_{gameType}"),
+                                    InlineKeyboardButton("Shutouts", callback_data=f"stats_goalies_shutouts_DESC_{gameType}"),
+                                    InlineKeyboardButton("Wins", callback_data=f"stats_goalies_wins_DESC_{gameType}"))
 
     return kb
 
 
-def keyboard_stats_defensemen():
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data="stats_defensemen_points"),
-                                    InlineKeyboardButton("Goals", callback_data="stats_defensemen_goals"),
-                                    InlineKeyboardButton("Assists", callback_data="stats_defensemen_assists"))
+def keyboard_stats_skaters(gameType='regular'):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_skaters_points_{gameType}"),
+                                    InlineKeyboardButton("Goals", callback_data=f"stats_skaters_goals_{gameType}"),
+                                    InlineKeyboardButton("Assists", callback_data=f"stats_skaters_assists_{gameType}"))
 
     return kb
 
 
-def keyboard_stats_rookies():
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data="stats_rookies_points"),
-                                    InlineKeyboardButton("Goals", callback_data="stats_rookies_goals"),
-                                    InlineKeyboardButton("Assists", callback_data="stats_rookies_assists"))
+def keyboard_stats_defensemen(gameType='regular'):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_defensemen_points_{gameType}"),
+                                    InlineKeyboardButton("Goals", callback_data=f"stats_defensemen_goals_{gameType}"),
+                                    InlineKeyboardButton("Assists", callback_data=f"stats_defensemen_assists_{gameType}"))
 
     return kb
 
 
-def keyboard_stats_teams():
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Wins", callback_data="stats_teams_wins_DESC"),
-                                    InlineKeyboardButton("PP %", callback_data="stats_teams_powerPlayPct_DESC"),
-                                    InlineKeyboardButton("PK %", callback_data="stats_teams_penaltyKillPct_DESC"))
+def keyboard_stats_rookies(gameType='regular'):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_rookies_points_{gameType}"),
+                                    InlineKeyboardButton("Goals", callback_data=f"stats_rookies_goals_{gameType}"),
+                                    InlineKeyboardButton("Assists", callback_data=f"stats_rookies_assists_{gameType}"))
+
+    return kb
+
+
+def keyboard_stats_teams_gameType():
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Regular season", callback_data="stats_teams_regular"),
+                                    InlineKeyboardButton("PlayOffs", callback_data="stats_teams_playoff"))
+
+    return kb
+
+
+def keyboard_stats_teams(gameType='regular'):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Wins", callback_data=f"stats_teams_wins_DESC_{gameType}"),
+                                    InlineKeyboardButton("PP %", callback_data=f"stats_teams_powerPlayPct_DESC_{gameType}"),
+                                    InlineKeyboardButton("PK %", callback_data=f"stats_teams_penaltyKillPct_DESC_{gameType}"))
 
     return kb
 

@@ -45,29 +45,41 @@ from nhl import keyboards
 
 #-- Leaders ---------------------------------------------------------------------------------------
 async def command_stats(message: types.Message):
-    await message.answer(f"{nhl.ico['stats']}<b>Players Stats - Leaders:</b>", parse_mode="HTML")
-    await command_stats_skaters(message)
-    await command_stats_goalies(message)
-    await command_stats_defensemen(message)
-    await command_stats_rookies(message)
+    await message.answer(
+        f"{nhl.ico['stats']}<b>Players Stats - Leaders:</b>",
+        parse_mode="HTML",
+        reply_markup=keyboards.keyboard_stats_gameType())
+
+
+async def command_stats_leaders_kb(callback: types.CallbackQuery):
+    gameType = callback.data.split('_')[2]
+
+    await callback.message.edit_text(f"{nhl.ico['stats']}<b>Players Stats - Leaders({nhl.gameType[gameType]['name']}):</b>", parse_mode="HTML")
+    await command_stats_skaters(callback.message, gameType=gameType)
+    await command_stats_goalies(callback.message, gameType=gameType)
+    await command_stats_defensemen(callback.message, gameType=gameType)
+    await command_stats_rookies(callback.message, gameType=gameType)
 
 
 #-- Skaters ---------------------------------------------------------------------------------------
-async def command_stats_skaters(message: types.Message):
+async def command_stats_skaters(message: types.Message, gameType='regular'):
     await message.answer(
-        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Skaters Stats:</b>\n{stats.get_stats_skaters_byProperty_text(property='points', full=False)}",
+        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Skaters Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_skaters_byProperty_text(property='points', full=False, gameType=gameType)}",
         parse_mode="HTML",
-        reply_markup=keyboards.keyboard_stats_skaters())
+        reply_markup=keyboards.keyboard_stats_skaters(gameType))
 
 
-async def command_stats_skaters_kb(callback : types.CallbackQuery):
-    stata = callback.data.split('_')[2]
+async def command_stats_skaters_kb(callback: types.CallbackQuery, gameType='regular'):
+    cb_data = callback.data.split('_')
+    stata = cb_data[2]
+    gameType = cb_data[3]
+
     try:
         #await callback.message.answer(
         await callback.message.edit_text(
-            f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Skaters Stats:</b>\n{stats.get_stats_skaters_byProperty_text(property=stata, full=False)}",
+            f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Skaters Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_skaters_byProperty_text(property=stata, full=False, gameType=gameType)}",
             parse_mode="HTML",
-            reply_markup=keyboards.keyboard_stats_skaters())
+            reply_markup=keyboards.keyboard_stats_skaters(gameType))
 
         await callback.answer()
 
@@ -76,21 +88,25 @@ async def command_stats_skaters_kb(callback : types.CallbackQuery):
 
 
 #-- Goalies ---------------------------------------------------------------------------------------
-async def command_stats_goalies(message: types.Message):
+async def command_stats_goalies(message: types.Message, gameType='regular'):
     await message.answer(
-        f"{nhl.ico['goalie']}{nhl.ico['stats']}<b>Goalies Stats:</b>\n{stats.get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=False)}",
+        f"{nhl.ico['goalie']}{nhl.ico['stats']}<b>Goalies Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=False, gameType=gameType)}",
         parse_mode="HTML",
-        reply_markup=keyboards.keyboard_stats_goalies())
+        reply_markup=keyboards.keyboard_stats_goalies(gameType))
 
 
-async def command_stats_goalies_kb(callback : types.CallbackQuery):
-    stata = callback.data.split('_')[2:]
+async def command_stats_goalies_kb(callback: types.CallbackQuery, gameType='regular'):
+    cb_data = callback.data.split('_')
+    stata = cb_data[2]
+    direction = cb_data[3]
+    gameType = cb_data[4]
+
     try:
         #await callback.message.answer(
         await callback.message.edit_text(
-            f"{nhl.ico['goalie']}{nhl.ico['stats']}<b>Goalies Stats:</b>\n{stats.get_stats_goalies_byProperty_text(property=stata[0], direction=stata[1], full=False)}",
+            f"{nhl.ico['goalie']}{nhl.ico['stats']}<b>Goalies Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_goalies_byProperty_text(property=stata, direction=direction, full=False, gameType=gameType)}",
             parse_mode="HTML",
-            reply_markup=keyboards.keyboard_stats_goalies())
+            reply_markup=keyboards.keyboard_stats_goalies(gameType))
 
         await callback.answer()
 
@@ -99,21 +115,23 @@ async def command_stats_goalies_kb(callback : types.CallbackQuery):
 
 
 #-- Defensemen ------------------------------------------------------------------------------------
-async def command_stats_defensemen(message: types.Message):
+async def command_stats_defensemen(message: types.Message, gameType='regular'):
     await message.answer(
-        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Defensemen Stats:</b>\n{stats.get_stats_defensemen_byProperty_text(property='points', full=False)}",
+        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Defensemen Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_defensemen_byProperty_text(property='points', full=False, gameType=gameType)}",
         parse_mode="HTML",
-        reply_markup=keyboards.keyboard_stats_defensemen())
+        reply_markup=keyboards.keyboard_stats_defensemen(gameType))
 
 
-async def command_stats_defensemen_kb(callback : types.CallbackQuery):
+async def command_stats_defensemen_kb(callback : types.CallbackQuery, gameType='regular'):
     stata = callback.data.split('_')[2]
+    gameType = callback.data.split('_')[3]
+
     try:
         #await callback.message.answer(
         await callback.message.edit_text(
-            f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Defensemen Stats:</b>\n{stats.get_stats_defensemen_byProperty_text(property=stata, full=False)}",
+            f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Defensemen Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_defensemen_byProperty_text(property=stata, full=False, gameType=gameType)}",
             parse_mode="HTML",
-            reply_markup=keyboards.keyboard_stats_defensemen())
+            reply_markup=keyboards.keyboard_stats_defensemen(gameType))
 
         await callback.answer()
 
@@ -122,21 +140,24 @@ async def command_stats_defensemen_kb(callback : types.CallbackQuery):
 
 
 #-- Rookies ---------------------------------------------------------------------------------------
-async def command_stats_rookies(message: types.Message):
+async def command_stats_rookies(message: types.Message, gameType='regular'):
     await message.answer(
-        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Rookies Stats:</b>\n{stats.get_stats_rookies_byProperty_text(property='points', full=False)}",
+        f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Rookies Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_rookies_byProperty_text(property='points', full=False, gameType=gameType)}",
         parse_mode="HTML",
-        reply_markup=keyboards.keyboard_stats_rookies())
+        reply_markup=keyboards.keyboard_stats_rookies(gameType))
 
 
-async def command_stats_rookies_kb(callback: types.CallbackQuery):
-    stata = callback.data.split('_')[2]
+async def command_stats_rookies_kb(callback: types.CallbackQuery, gameType='regular'):
+    cb_data = callback.data.split('_')
+    stata = cb_data[2]
+    gameType = cb_data[3]
+
     try:
         #await callback.message.answer(
         await callback.message.edit_text(
-            f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Rookies Stats:</b>\n{stats.get_stats_rookies_byProperty_text(property=stata, full=False)}",
+            f"{nhl.ico['skater']}{nhl.ico['stats']}<b>Rookies Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_rookies_byProperty_text(property=stata, full=False, gameType=gameType)}",
             parse_mode="HTML",
-            reply_markup=keyboards.keyboard_stats_rookies())
+            reply_markup=keyboards.keyboard_stats_rookies(gameType))
 
         await callback.answer()
 
@@ -145,21 +166,31 @@ async def command_stats_rookies_kb(callback: types.CallbackQuery):
 
 
 #-- Teams -----------------------------------------------------------------------------------------
-async def command_stats_teams(message: types.Message):
+async def command_stats_teams(message: types.Message, gameType='regular'):
     await message.answer(
-        f"{nhl.ico['stats']}<b>Teams Stats:</b>\n{stats.get_stats_teams_byProperty_text(property='wins', full=False)}",
+        f"{nhl.ico['stats']}<b>Teams Stats:</b>",
         parse_mode="HTML",
-        reply_markup=keyboards.keyboard_stats_teams())
+        reply_markup=keyboards.keyboard_stats_teams_gameType())
 
 
-async def command_stats_teams_kb(callback : types.CallbackQuery):
-    stata = callback.data.split('_')[2:]
+async def command_stats_teams_kb(callback : types.CallbackQuery, gameType='regular'):
+    cb_data = callback.data.split('_')
+
+    if cb_data[2] in nhl.gameType.keys():
+        stata = 'wins'
+        direction = 'DESC'
+        gameType = cb_data[2]
+    else:
+        stata = cb_data[2]
+        direction = cb_data[3]
+        gameType = cb_data[4]
+
     try:
         #await callback.message.answer(
         await callback.message.edit_text(
-            f"{nhl.ico['stats']}<b>Teams Stats:</b>\n{stats.get_stats_teams_byProperty_text(property=stata[0], direction=stata[1], full=False)}",
+            f"{nhl.ico['stats']}<b>Teams Stats({nhl.gameType[gameType]['name']}):</b>\n{stats.get_stats_teams_byProperty_text(property=stata, direction=direction, full=False, gameType=gameType)}",
             parse_mode="HTML",
-            reply_markup=keyboards.keyboard_stats_teams())
+            reply_markup=keyboards.keyboard_stats_teams(gameType))
 
         await callback.answer()
 
@@ -175,6 +206,7 @@ def register_handlers_stats(dp : Dispatcher):
     dp.register_message_handler(command_stats_defensemen, commands=['stats_defensemen'])
     dp.register_message_handler(command_stats_rookies, commands=['stats_rookies'])
     dp.register_message_handler(command_stats_teams, commands=['stats_teams'])
+    dp.register_callback_query_handler(command_stats_leaders_kb, Text(startswith='stats_leaders_'))
     dp.register_callback_query_handler(command_stats_skaters_kb, Text(startswith='stats_skaters_'))
     dp.register_callback_query_handler(command_stats_goalies_kb, Text(startswith='stats_goalies_'))
     dp.register_callback_query_handler(command_stats_defensemen_kb, Text(startswith='stats_defensemen_'))

@@ -51,9 +51,12 @@ def get_request_nhl_stats_api(query_str: str):
 
 #-- Статистика вратарей ---------------------------------------------------------------------------
 # Получение данных вратарской статистики по указанному стат.показателю
-def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10):
-    gamesPlayed = 15
-    gameTypeId = 2 # 2 = regular season, 3 = playoffs
+def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular'):
+    #gameTypeId: 2 = regular season, 3 = playoffs
+    gameTypeId = nhl.gameType[gameType]['id']
+
+    gamesPlayed = nhl.gameType[gameType]['min_games_played_goalies']
+
     seasonId = nhl.get_season_current()['seasonId']
 
     query_str = '/goalie/summary?isAggregate=false&isGame=false'
@@ -94,8 +97,8 @@ def get_stats_goalies_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода вратарской статистики по указанному стат.показателю
-def get_stats_goalies_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_goalies_data_byProperty(property, direction, limit)
+def get_stats_goalies_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+    data = get_stats_goalies_data_byProperty(property, direction, limit, gameType=gameType)
 
     text = get_stats_goalies_text_fromData(data, full)
 
@@ -114,9 +117,11 @@ def get_stats_goalies_text(full=False):
 
 #-- Статистика полевых ----------------------------------------------------------------------------
 # Получение данных статистики полевых по указанному стат.показателю
-def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10):
-    gamesPlayed = 1
-    gameTypeId = 2 # 2 = regular season, 3 = playoffs
+def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular'):
+    #gameTypeId: 2 = regular season, 3 = playoffs
+    gameTypeId = nhl.gameType[gameType]['id']
+
+    gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
     seasonId = nhl.get_season_current()['seasonId']
 
     query_str = '/skater/summary?isAggregate=false&isGame=false'
@@ -157,8 +162,8 @@ def get_stats_skaters_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода статистики полевых по указанному стат.показателю
-def get_stats_skaters_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_skaters_data_byProperty(property, direction, limit)
+def get_stats_skaters_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+    data = get_stats_skaters_data_byProperty(property, direction, limit, gameType=gameType)
 
     text = get_stats_skaters_text_fromData(data, full)
 
@@ -176,9 +181,11 @@ def get_stats_skaters_text(full=False):
 
 #-- Статистика защитников -------------------------------------------------------------------------
 # Получение данных статистики защитников по указанному стат.показателю
-def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=10):
-    gamesPlayed = 1
-    gameTypeId = 2 # 2 = regular season, 3 = playoffs
+def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular'):
+    #gameTypeId: 2 = regular season, 3 = playoffs
+    gameTypeId = nhl.gameType[gameType]['id']
+
+    gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
     seasonId = nhl.get_season_current()['seasonId']
 
     query_str = '/skater/summary?isAggregate=false&isGame=false'
@@ -219,8 +226,8 @@ def get_stats_defensemen_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода статистики защитников по указанному стат.показателю
-def get_stats_defensemen_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_defensemen_data_byProperty(property, direction, limit)
+def get_stats_defensemen_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+    data = get_stats_defensemen_data_byProperty(property, direction, limit, gameType=gameType)
 
     text = get_stats_defensemen_text_fromData(data, full)
 
@@ -238,9 +245,11 @@ def get_stats_defensemen_text(full=False):
 
 #-- Статистика новичков -------------------------------------------------------------------------
 # Получение данных статистики новичков по указанному стат.показателю
-def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10):
-    gamesPlayed = 1
-    gameTypeId = 2 # 2 = regular season, 3 = playoffs
+def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular'):
+    #gameTypeId: 2 = regular season, 3 = playoffs
+    gameTypeId = nhl.gameType[gameType]['id']
+
+    gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
     seasonId = nhl.get_season_current()['seasonId']
 
     query_str = '/skater/summary?isAggregate=false&isGame=false'
@@ -281,8 +290,8 @@ def get_stats_rookies_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода статистики новичков по указанному стат.показателю
-def get_stats_rookies_byProperty_text(property: str, direction='DESC', limit=10, full=False):
-    data = get_stats_rookies_data_byProperty(property, direction, limit)
+def get_stats_rookies_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+    data = get_stats_rookies_data_byProperty(property, direction, limit, gameType=gameType)
 
     text = get_stats_rookies_text_fromData(data, full)
 
@@ -300,8 +309,10 @@ def get_stats_rookies_text(full=False):
 
 #-- Статистика команд -------------------------------------------------------------------------
 # Получение данных статистики команд по указанному стат.показателю
-def get_stats_teams_data_byProperty(property: str, direction='DESC'):
-    gameTypeId = 2 # 2 = regular season, 3 = playoffs
+def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular'):
+    #gameTypeId: 2 = regular season, 3 = playoffs
+    gameTypeId = nhl.gameType[gameType]['id']
+
     seasonId = nhl.get_season_current()['seasonId']
 
     query_str = '/team/summary?isAggregate=false&isGame=false'
@@ -339,8 +350,8 @@ def get_stats_teams_text_fromData(data, full=False):
 
 
 # Формирование теста для вывода статистики команд по указанному стат.показателю
-def get_stats_teams_byProperty_text(property: str, direction='DESC', full=False):
-    data = get_stats_teams_data_byProperty(property, direction)
+def get_stats_teams_byProperty_text(property: str, direction='DESC', full=False, gameType='regular'):
+    data = get_stats_teams_data_byProperty(property, direction, gameType=gameType)
 
     text = get_stats_teams_text_fromData(data, full)
 

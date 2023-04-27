@@ -62,6 +62,11 @@ tz = {
     'KHV': pytz.timezone("Asia/Vladivostok")
 }
 
+# gameType
+gameType = {
+    'regular': {'id': 2, 'name': 'Regular season', 'min_games_played_skaters': 1, 'min_games_played_goalies': 15}, # regular season
+    'playoff': {'id': 3, 'name': 'PlayOff', 'min_games_played_skaters': 1, 'min_games_played_goalies': 1}  # playoffs
+}
 
 hide_score = True # Скрывать счёт в командах scores, schedule (в детальных статусах матчей игнорируется)
 
