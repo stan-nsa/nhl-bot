@@ -146,7 +146,8 @@ def game_summary_text(data):
     widht_1st_field = len(team_away_name)
 
     txt = "<b>Game Summary:</b>\n"
-    txt += '<code>'
+    #txt += '<code>'
+    txt += '<pre>'
     txt += f"{team_away_name} |   vs   | {team_home_name}\n" \
            f"{str(team_away_stats['goals']).rjust(widht_1st_field)} | Goals  | {team_home_stats['goals']}\n" \
            f"{str(team_away_stats['shots']).rjust(widht_1st_field)} | Shots  | {team_home_stats['shots']}\n" \
@@ -154,7 +155,8 @@ def game_summary_text(data):
            f"{str(team_away_stats['hits']).rjust(widht_1st_field)} |  Hits  | {team_home_stats['hits']}\n" \
            f"{str(team_away_stats['pim']).rjust(widht_1st_field)} |  PIM   | {team_home_stats['pim']}\n" \
            f"{team_away_stats_pp.rjust(widht_1st_field)} |  PP    | {team_home_stats_pp}"
-    txt += '</code>'
+    #txt += '</code>'
+    txt += '</pre>'
 
     return txt
 
@@ -237,7 +239,8 @@ def game_teams_stats_text(data):
 
         # Формирование окончательного текста статистики нападающих, защитников и вратарей
         txt += f"\n<b>{team_name}</b>\n"
-        txt += "<code>"
+        #txt += "<code>"
+        txt += "<pre>"
         for players_pos, players in players_by_positions.items():
             if (players_pos == 'Goalies'):
                 txt += f"_#|{players_pos.center(width_player_name, '_')}|Sv|S_|_Sv%_|_TOI_\n" # Шапка таблицы статистики вратарей
@@ -247,7 +250,8 @@ def game_teams_stats_text(data):
             for player in players:
                 txt += f"{player}\n"
 
-        txt += "</code>"
+        #txt += "</code>"
+        txt += "</pre>"
 
     return txt
 
