@@ -1,3 +1,6 @@
+# https://api-web.nhle.com/v1/gamecenter/2023020206/landing
+# https://api-web.nhle.com/v1/gamecenter/2023020204/boxscore
+
 from nhl import nhl
 from nhl import schedule
 
@@ -7,7 +10,8 @@ from nhl import schedule
 # Получение от сервера данных о матче
 def get_game_data(game_id):
 
-    game_str = f"/game/{game_id}/feed/live"
+    #OLD game_str = f"/game/{game_id}/feed/live"
+    game_str = f"gamecenter/{game_id}/landing"
 
     data = nhl.get_request_nhl_api(game_str)
 

@@ -6,6 +6,9 @@
 #stats_teams - Статистика команд
 
 
+# Scores: https://api-web.nhle.com/v1/score/now
+#         https://api-web.nhle.com/v1/score/2023-11-10
+
 # Season (current):  https://statsapi.web.nhl.com/api/v1/seasons/current
 # ESPN News
 # http://site.api.espn.com/apis/site/v2/sports/hockey/nhl/news?limit=15
@@ -18,7 +21,8 @@ import pytz
 # from datetime import datetime, timezone, date, timedelta
 # import db
 
-NHL_API_URL = "https://statsapi.web.nhl.com/api/v1"
+#OLD NHL_API_URL = "https://statsapi.web.nhl.com/api/v1"
+NHL_API_URL = "https://api-web.nhle.com/v1/"
 
 proxies = {
     'http': 'socks5://puser:8888@rkn-pnh.hopto.org:8888',

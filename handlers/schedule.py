@@ -8,7 +8,8 @@ from nhl import nhl
 
 async def command_scores(message: types.Message):
     data = schedule.get_scores()
-    day = schedule.get_correct_date_from_data(data)
+    #OLD day = schedule.get_correct_date_from_data(data)
+    day = data['currentDate']
 
     await message.answer(
         f"{nhl.ico['scores']} <b>Scores:</b>\n{schedule.get_scores_text(data, hideScore=nhl.hide_score)}",
