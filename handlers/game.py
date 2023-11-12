@@ -11,7 +11,7 @@ async def command_game_details(callback : types.CallbackQuery):
     game_id = callback_data_parts[2]
 
     if (len(callback_data_parts) < 4):
-        details = 'scoringPlays'
+        details = 'scoring'
         await callback.message.answer(
             f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
             reply_markup=keyboards.keyboard_game_details(game_id))

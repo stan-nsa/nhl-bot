@@ -145,7 +145,7 @@ def get_schedule_days_text(data, hideScore=False):
     header_finished = ''
     for game in data['games']:
         # Scheduled
-        if game['gameState'] in {'FUT', 'PRE'}:
+        if game['gameState'] in nhl.gameState['scheduled']:
             if (header_scheduled == ''): # Заголовок таблицы расписания
                 header_scheduled = \
                     f"\n{nhl.ico['time']} <b>Scheduled:</b>\n" \
@@ -153,13 +153,13 @@ def get_schedule_days_text(data, hideScore=False):
                 txt += header_scheduled
 
         # Live
-        elif game['gameState'] in {'LIVE', 'CRIT'}:
+        elif game['gameState'] in nhl.gameState['live']:
             if (header_live == ''):
                 header_live = f"\n{nhl.ico['live']} <b>Live:</b>\n"
                 txt += header_live
 
         # Final
-        elif game['gameState'] in {'FINAL', 'OFF'}:
+        elif game['gameState'] in nhl.gameState['final']:
             if (header_finished == ''):
                 header_finished = f"\n{nhl.ico['finished']} <b>Finished:</b>\n"
                 txt += header_finished

@@ -14,13 +14,13 @@
 # https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"points","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
 # https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"powerPlayPct","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
 # https://api.nhle.com/stats/rest/en/team/summary?isAggregate=false&isGame=false&sort=[{"property":"penaltyKillPct","direction":"DESC"}]&start=0&limit=10&cayenneExp=gameTypeId=2 and seasonId=20222023
-
+# https://api.nhle.com/stats/rest/en/team/summary?cayenneExp=gameTypeId=2 and seasonId=20232024 and teamId=6
 
 import requests
 
 from nhl import nhl
 
-NHL_STATS_API_URL = "https://api.nhle.com/stats/rest/en"
+NHL_STATS_API_URL = "https://api.nhle.com/stats/rest/en/"
 
 goalie_stats = {
     'savePct': 'Sv%',
@@ -59,7 +59,7 @@ def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10,
 
     seasonId = nhl.get_season_current()['id']
 
-    query_str = '/goalie/summary?isAggregate=false&isGame=false'
+    query_str = 'goalie/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
     query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
@@ -124,7 +124,7 @@ def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10,
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
     seasonId = nhl.get_season_current()['id']
 
-    query_str = '/skater/summary?isAggregate=false&isGame=false'
+    query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
     query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
@@ -188,7 +188,7 @@ def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
     seasonId = nhl.get_season_current()['id']
 
-    query_str = '/skater/summary?isAggregate=false&isGame=false'
+    query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
     query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=positionCode="D" and gameTypeId={gameTypeId} and seasonId={seasonId}'
@@ -252,7 +252,7 @@ def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10,
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
     seasonId = nhl.get_season_current()['id']
 
-    query_str = '/skater/summary?isAggregate=false&isGame=false'
+    query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
     query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=isRookie=1 and gameTypeId={gameTypeId} and seasonId={seasonId}'
@@ -315,7 +315,7 @@ def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='r
 
     seasonId = nhl.get_season_current()['id']
 
-    query_str = '/team/summary?isAggregate=false&isGame=false'
+    query_str = 'team/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_exp = f'&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
 
@@ -356,4 +356,3 @@ def get_stats_teams_byProperty_text(property: str, direction='DESC', full=False,
     text = get_stats_teams_text_fromData(data, full)
 
     return text
-

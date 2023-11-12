@@ -87,7 +87,15 @@ gameState = {
 gamePeriods = {
     1: '1st',
     2: '2nd',
-    3: '3rd'
+    3: '3rd',
+    4: 'OT'
+}
+
+# goalType
+goalType = {
+    'ev': '',       # в равных составах
+    'pp': 'PPG',    # в большинстве
+    'sh': 'SHG'     # в меньшинстве
 }
 
 hide_score = True # Скрывать счёт в командах scores, schedule (в детальных статусах матчей игнорируется)
@@ -101,7 +109,7 @@ def get_request_nhl_api(query_str):
 
 # Получение от сервера данных о текущем сезоне
 def get_season_current():
-    query_str = '/season?sort=[{"property":"id","direction":"DESC"}]&limit=1'
+    query_str = 'season?sort=[{"property":"id","direction":"DESC"}]&limit=1'
 
     data = stats.get_request_nhl_stats_api(query_str)
 

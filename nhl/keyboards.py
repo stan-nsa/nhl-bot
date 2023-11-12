@@ -31,7 +31,7 @@ def keyboard_schedule_details(games):
 
 #-- Keyboard for Game -----------------------------------------------------------------------------
 def keyboard_game_details(game_id):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['stick']}{ico['goal']}Scoring", callback_data=f"Game_Details_{game_id}_scoringPlays"),
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['stick']}{ico['goal']}Scoring", callback_data=f"Game_Details_{game_id}_scoring"),
                                     InlineKeyboardButton(f"{ico['penalty']}Penalties", callback_data=f"Game_Details_{game_id}_penaltyPlays"),
                                     InlineKeyboardButton(f"{ico['stats']}Teams Stats", callback_data=f"Game_Details_{game_id}_teamsStats"))
 
