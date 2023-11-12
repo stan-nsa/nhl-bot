@@ -17,6 +17,7 @@
 import requests
 from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/   https://k3a.me/telegram-emoji-list-codes-descriptions/
 import pytz
+from nhl import stats
 
 # from datetime import datetime, timezone, date, timedelta
 # import db
@@ -98,6 +99,13 @@ def get_request_nhl_api(query_str):
 
 # Получение от сервера данных о текущем сезоне
 def get_season_current():
+    query_str = '/season?sort=[{"property":"id","direction":"DESC"}]&limit=1'
+
+    data = stats.get_request_nhl_stats_api(query_str)
+
+    return data['data'][0]['id']
+
+def get_season_current_OLD():
     query_str = '/seasons/current'
 
     data = get_request_nhl_api(query_str)

@@ -138,9 +138,7 @@ def get_schedule_day_text(day=None, data=None, hideScore=False):
 # Формирование теста для вывода расписания
 def get_schedule_days_text(data, hideScore=False):
 
-    txt = ""
-
-    txt += f"\n{nhl.ico['schedule']} <b>{data['currentDate']}:</b>\n"
+    txt = f"\n{nhl.ico['schedule']} <b>{data['currentDate']}:</b>\n"
 
     header_live = ''
     header_scheduled = ''
