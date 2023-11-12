@@ -209,24 +209,25 @@ def get_schedule_days_text_OLD(data, hideScore=False):
 def get_schedule_game_text(game, hideScore=False, inlinemenu=False):
 
     # Scheduled
-    if game['gameState'] in {'FUT', 'PRE'}:
+    if game['gameState'] in nhl.gameState['scheduled']:
         txt = f"{game['awayTeam']['abbrev']}{nhl.ico['vs']}{game['homeTeam']['abbrev']}" \
                f"{nhl.ico['time']}{get_game_time_tz_text(game['startTimeUTC'], inlinemenu=inlinemenu)}"
         txt = txt if (inlinemenu) else f"<code>{txt}</code>"
 
     # Live
-    elif game['gameState'] in {'LIVE', 'CRIT'}:
-        currentPeriod = game['periodDescriptor']['periodType'] if game['period'] > 3 else game['periodDescriptor']['number'] + ' period'
+    elif game['gameState'] in nhl.gameState['live']:
+        currentPeriod = game['periodDescriptor']['periodType'] if game['period'] > 3 else nhl.gamePeriods[game['periodDescriptor']['number']]
         txt = f"{get_game_teams_score_text(game, hideScore=hideScore, inlinemenu=inlinemenu)} - " \
-               f"{nhl.ico['live']} {currentPeriod}/{game['clock']['timeRemaining']}"
+              f"{nhl.ico['live']} {currentPeriod}/" \
+              f"{'END' if (game['clock']['inIntermission']) else game['clock']['timeRemaining']}"
 
     # Final
-    elif game['gameState'] in {'FINAL', 'OFF'}:
+    elif game['gameState'] in nhl.gameState['final']:
         txt = f"{get_game_teams_score_text(game, hideScore=hideScore, inlinemenu=inlinemenu)} - " \
                f"{nhl.ico['finished']} {'' if game['period'] == 3 else game['periodDescriptor']['periodType']}"
 
     # TBD/Postponed
-    elif game['gameState'] in {'TBD', 'PST'}:  # 8 - Scheduled (Time TBD); 9 - Postponed
+    elif game['gameState'] in nhl.gameState['tbd']:  # 8 - Scheduled (Time TBD); 9 - Postponed
         txt = f"{game['awayTeam']['abbrev']}{nhl.ico['vs']}{game['homeTeam']['abbrev']}" \
                f"{nhl.ico['tbd']} {game['gameState']}"
         txt = txt if (inlinemenu) else f"<code>{txt}</code>"

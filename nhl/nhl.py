@@ -72,6 +72,21 @@ gameType = {
     'playoff': {'id': 3, 'name': 'PlayOff', 'min_games_played_skaters': 1, 'min_games_played_goalies': 1}  # playoffs
 }
 
+# gameState
+gameState = {
+    'scheduled': {'FUT', 'PRE'},
+    'live': {'LIVE', 'CRIT'},
+    'final': {'FINAL', 'OFF'},
+    'tbd': {'TBD', 'PST'} # 8 - Scheduled (Time TBD); 9 - Postponed
+}
+
+# gamePeriods
+gamePeriods = {
+    1: '1st',
+    2: '2nd',
+    3: '3rd'
+}
+
 hide_score = True # Скрывать счёт в командах scores, schedule (в детальных статусах матчей игнорируется)
 
 
