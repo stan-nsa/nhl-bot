@@ -10,6 +10,8 @@
 #         https://api-web.nhle.com/v1/score/2023-11-10
 
 # Season (current):  https://statsapi.web.nhl.com/api/v1/seasons/current
+# https://api.nhle.com/stats/rest/en/season?sort=[{"property":"id","direction":"DESC"}]&limit=1
+
 # ESPN News
 # http://site.api.espn.com/apis/site/v2/sports/hockey/nhl/news?limit=15
 
@@ -103,7 +105,7 @@ def get_season_current():
 
     data = stats.get_request_nhl_stats_api(query_str)
 
-    return data['data'][0]['id']
+    return data['data'][0]
 
 def get_season_current_OLD():
     query_str = '/seasons/current'

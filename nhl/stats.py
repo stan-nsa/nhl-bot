@@ -57,7 +57,7 @@ def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10,
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_goalies']
 
-    seasonId = nhl.get_season_current()['seasonId']
+    seasonId = nhl.get_season_current()['id']
 
     query_str = '/goalie/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
@@ -122,7 +122,7 @@ def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10,
     gameTypeId = nhl.gameType[gameType]['id']
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
-    seasonId = nhl.get_season_current()['seasonId']
+    seasonId = nhl.get_season_current()['id']
 
     query_str = '/skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
@@ -186,7 +186,7 @@ def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=
     gameTypeId = nhl.gameType[gameType]['id']
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
-    seasonId = nhl.get_season_current()['seasonId']
+    seasonId = nhl.get_season_current()['id']
 
     query_str = '/skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
@@ -250,7 +250,7 @@ def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10,
     gameTypeId = nhl.gameType[gameType]['id']
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
-    seasonId = nhl.get_season_current()['seasonId']
+    seasonId = nhl.get_season_current()['id']
 
     query_str = '/skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
@@ -313,7 +313,7 @@ def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='r
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
-    seasonId = nhl.get_season_current()['seasonId']
+    seasonId = nhl.get_season_current()['id']
 
     query_str = '/team/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
