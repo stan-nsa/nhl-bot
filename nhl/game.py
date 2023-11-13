@@ -79,16 +79,16 @@ def get_game_text(game_id, details='scoring'):
         txt_game_status = f"{nhl.ico['live']} <b>Live: {currentPeriod} / {'END' if (boxscore['clock']['inIntermission']) else boxscore['clock']['timeRemaining']}</b>"
         txt_team_away_score = schedule.get_game_team_score_text(boxscore['awayTeam']['score'])
         txt_team_home_score = schedule.get_game_team_score_text(boxscore['homeTeam']['score'])
-        txt_game_summary = game_summary_text(boxscore)
-        txt_game_details = f"{game_details_text(landing, details)}"
+        txt_game_summary = game_summary_text(landing)
+        txt_game_details = game_details_text(landing, details)
 
     # Final
     elif boxscore['gameState'] in nhl.gameState['final']:
         txt_game_status = f"{nhl.ico['finished']} <b>Finished:</b> {'' if boxscore['period'] == 3 else boxscore['periodDescriptor']['periodType']}"
         txt_team_away_score = schedule.get_game_team_score_text(boxscore['awayTeam']['score'])
         txt_team_home_score = schedule.get_game_team_score_text(boxscore['homeTeam']['score'])
-        txt_game_summary = game_summary_text(boxscore)
-        txt_game_details = f"{game_details_text(landing, details)}"
+        txt_game_summary = game_summary_text(landing)
+        txt_game_details = game_details_text(landing, details)
 
     # TBD/Postponed
     elif boxscore['gameState'] in nhl.gameState['tbd']:
@@ -196,7 +196,6 @@ def game_details_text(data, type_details: str):
                 for goal in period['goals']:
                     score_teams = f"{goal['awayScore']}:{goal['homeScore']}"    # Счёт
                     score_team = f"{goal['teamAbbrev']}"  # Забившая команда
-                    #score_time = f"{period_txt}/{goal['timeInPeriod']}"   # Время изменения счёта (период/м:с)
                     score_time = f"{goal['timeInPeriod']}"  # Время изменения счёта (м:с)
                     score_strength = f"({nhl.goalType[goal['strength']]}) " if (goal['strength'] != 'ev') else ''
                     score_player = f"{goal['firstName']} {goal['lastName']} ({goal['goalsToDate']})"
@@ -209,21 +208,23 @@ def game_details_text(data, type_details: str):
                     txt += f"\n<b>{score_teams}</b> ({score_team}) ({score_time}) {nhl.ico['goal']} {score_strength}{score_player}\n"
                     txt += f" assists: {score_assists}\n" if len(score_assists) else ''
 
-        case 'penaltyPlays': # Нарушения
-            all_plays = data['liveData']['plays']['allPlays']
-            list_plays = data['liveData']['plays'][type_details]
+        case 'penalties': # Нарушения
+            penalties = data['summary'][type_details]
 
             txt += f"{nhl.ico['penalty']} <b>Penalties:</b>\n"
 
-            for idx_play in list_plays:
-                penalty = all_plays[idx_play]
+            for period in penalties:
+                period_txt = f"{period['periodDescriptor']['periodType'] if (period['period'] > 3) else nhl.gamePeriods[period['period']]}"
+                txt += f"\n<b>{period_txt}{' period' if (period['period'] < 4) else ''}:</b>"
 
-                penalty_time = f"{penalty['about']['ordinalNum']}/{penalty['about']['periodTime']}"  # Время нарушения (период/м:с)
-                penalty_team = f"{penalty['team']['triCode']}"  # Команда нарушителя
-                penalty_minutes = penalty['result']['penaltyMinutes']  # Срок отбывания нарушения
-                penalty_desc = penalty['result']['description']  # Описание нарушения
+                for penalty in period['penalties']:
+                    penalty_time = penalty['timeInPeriod']  # Время нарушения (период/м:с)
+                    penalty_team = penalty['teamAbbrev']  # Команда нарушителя
+                    penalty_minutes = penalty['duration']  # Срок отбывания нарушения
+                    penalty_desc = penalty['descKey']  # Описание нарушения
+                    penalty_player = penalty['committedByPlayer']  # Оштрафованный игрок
 
-                txt += f"\n<b>{penalty_time}</b> ({penalty_team}) ({penalty_minutes} min.) {nhl.ico['penalty']} {penalty_desc}\n"
+                    txt += f"\n<b>{penalty_time}</b> ({penalty_team}) {nhl.ico['penalty']} {penalty_player}: {penalty_desc} ({penalty_minutes} min.)\n"
 
         case 'teamsStats':  # Статистика игроков команд
             txt += f"<b>Team Stats:</b>\n"
@@ -238,17 +239,18 @@ def game_summary_text(data):
     team_home_name = data['homeTeam']['name']['default']
 
     widht_1st_field = len(team_away_name)
+    widht_stats_abbrev_field = 5    # Ширина колонки аббривиатуры статистики
 
     txt = "<b>Game Summary:</b>\n"
     #txt += '<code>'
     txt += '<pre>'
-    txt += f"{team_away_name} |   vs   | {team_home_name}\n" \
-           f"{str(data['awayTeam']['score']).rjust(widht_1st_field)} | Goals  | {data['homeTeam']['score']}\n" \
-           f"{str(data['awayTeam']['sog']).rjust(widht_1st_field)} | Shots  | {data['homeTeam']['sog']}\n" \
-           f"{str(data['awayTeam']['blocks']).rjust(widht_1st_field)} | Blocks | {data['homeTeam']['blocks']}\n" \
-           f"{str(data['awayTeam']['hits']).rjust(widht_1st_field)} |  Hits  | {data['homeTeam']['hits']}\n" \
-           f"{str(data['awayTeam']['pim']).rjust(widht_1st_field)} |  PIM   | {data['homeTeam']['pim']}\n" \
-           f"{data['awayTeam']['powerPlayConversion'].rjust(widht_1st_field)} |  PP    | {data['homeTeam']['powerPlayConversion']}"
+    txt += f"{team_away_name} | {'vs'.center(widht_stats_abbrev_field)} | {team_home_name}\n" \
+           f"{str(data['awayTeam']['score']).rjust(widht_1st_field)} | {'Goals'.center(widht_stats_abbrev_field)} | {data['homeTeam']['score']}\n"
+
+    for stat in data['summary']['teamGameStats']:
+        if (stat['category'] in stats.game_stats):
+            txt += f"{str(stat['awayValue']).rjust(widht_1st_field)} | {stats.game_stats[stat['category']].center(widht_stats_abbrev_field)} | {stat['homeValue']}\n"
+
     #txt += '</code>'
     txt += '</pre>'
 

@@ -42,6 +42,15 @@ team_stats = {
     'wins': 'Win'
 }
 
+game_stats = {
+    'sog': 'SOG',
+    'faceoffPctg': 'FO%',
+    'powerPlay': 'PP',
+    'pim': 'PIM',
+    'hits': 'Hits',
+    'blockedShots': 'BLKS'
+}
+
 
 # Запрос к серверу для получения данных
 def get_request_nhl_stats_api(query_str: str):
