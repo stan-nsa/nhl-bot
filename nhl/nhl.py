@@ -51,7 +51,9 @@ ico = {
     'info': emojize(':information:'),
     'prev': emojize(':left_arrow:'),
     'next': emojize(':right_arrow:'),
-
+    'report': emojize(':receipt:'),
+    'link': emojize(':link:'),
+    'point': emojize(':backhand_index_pointing_right:'),
 
     'stick': emojize(':ice_hockey:'),
     'vs': emojize(':ice_hockey:'), # Versus

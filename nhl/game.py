@@ -159,8 +159,18 @@ def game_details_text(data, type_details: str):
                     txt += f"\n<b>{penalty_time}</b> ({penalty_team}) {nhl.ico['penalty']} {penalty_player}: {penalty_desc} ({penalty_minutes} min.)\n"
 
         case 'teamGameStats':  # Статистика игроков команд
-            txt += f"<b>Team Stats:</b>\n"
+            txt += f"{nhl.ico['stats']} <b>Team Stats:</b>\n"
             txt += game_teams_stats_text(data['boxscore'])
+
+        case 'gameReports':  # Отчеты
+            reports = data['boxscore']['boxscore']['gameReports']
+            txt += f"{nhl.ico['report']} <b>Game Reports:</b>\n\n" \
+                   f"{nhl.ico['point']} <a href='" + reports['gameSummary'] + "'>Game Summary</a>\n\n" \
+                   f"{nhl.ico['point']} <a href='" + reports['eventSummary'] + "'>Event Summary</a>\n\n" \
+                   f"{nhl.ico['point']} <a href='" + reports['rosters'] + "'>Club Playing Roster</a>\n\n" \
+                   f"{nhl.ico['point']} <a href='" + reports['shotSummary'] + "'>Shot Summary</a>\n\n" \
+                   f"{nhl.ico['point']} <a href='" + reports['toiAway'] + f"'>Time On Ice: {data['boxscore']['awayTeam']['name']['default']}</a>\n\n" \
+                   f"{nhl.ico['point']} <a href='" + reports['toiHome'] + f"'>Time On Ice: {data['boxscore']['homeTeam']['name']['default']}</a>"
 
     return txt
 

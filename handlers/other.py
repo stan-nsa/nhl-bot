@@ -45,26 +45,28 @@ async def followed(callback : types.CallbackQuery):
 
 
 async def command_test(message: types.Message):
-    await message.reply('<tg-spoiler><a href="https://ya.ru">CAR🏒PIT</a></tg-spoiler>', parse_mode="HTML")
-    await message.reply('<pre>PRE <b>pre</b> 🏒 pre</pre>', parse_mode="HTML")
-    await message.reply('<code>CODE <b>code</b> code</code>', parse_mode="HTML")
+    # await message.reply('<tg-spoiler><a href="https://ya.ru">CAR🏒PIT</a></tg-spoiler>', parse_mode="HTML")
+    # await message.reply('<pre>PRE <b>pre</b> 🏒 pre</pre>', parse_mode="HTML")
+    # await message.reply('<code>CODE <b>code</b> code</code>', parse_mode="HTML")
+    await message.reply("Reports:\n\n<b><a href='https://www.nhl.com/scores/htmlreports/20232024/GS020222.HTM'>Game Summary</a></b>", parse_mode="HTML")
+
     #await bot.send_message(message.from_user.id, 'test')
     #await message.delete()
 
 
-"""
-@dp.message_handler()
-async def echo(message: types.Message):
-    #print(message.text)
-    #await message.answer(message.text)
-    #await message.answer(message.text, parse_mode='HTML')
-    #await message.answer(message.text, parse_mode='MarkdownV2')
-    await message.answer(message.text)
-    await message.answer(message.md_text)
-    await message.answer(message.html_text)
-    # Дополняем исходный текст:
-    await message.answer(f'<u>Ваш текст</u>:\n\n{message.html_text}', parse_mode='HTML')
-"""
+
+# @dp.message_handler()
+# async def echo(message: types.Message):
+#     #print(message.text)
+#     #await message.answer(message.text)
+#     #await message.answer(message.text, parse_mode='HTML')
+#     #await message.answer(message.text, parse_mode='MarkdownV2')
+#     await message.answer(message.text)
+#     await message.answer(message.md_text)
+#     await message.answer(message.html_text)
+#     # Дополняем исходный текст:
+#     await message.answer(f'<u>Ваш текст</u>:\n\n{message.html_text}', parse_mode='HTML')
+
 
 def register_handlers_other(dp : Dispatcher):
     dp.register_message_handler(command_start, commands=['start', 'help'])
