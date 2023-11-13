@@ -115,13 +115,6 @@ def get_season_current():
 
     return data['data'][0]
 
-def get_season_current_OLD():
-    query_str = '/seasons/current'
-
-    data = get_request_nhl_api(query_str)
-
-    return data['seasons'][0]
-
 
 # Получение от сервера данных о командах
 def get_teams():
