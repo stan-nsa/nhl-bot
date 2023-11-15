@@ -5,6 +5,7 @@
 #stats - Статистика игроков
 #stats_teams - Статистика команд
 
+
 # NHL API Documentation:
 # https://github.com/Zmalski/NHL-API-Reference
 
