@@ -41,9 +41,9 @@ def keyboard_game_details(game_id):
 
 #-- Keyboard for Standings ------------------------------------------------------------------------
 def keyboard_standings():
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Division", callback_data="standings_byDivision"),
-                                    InlineKeyboardButton("Wild Card", callback_data="standings_wildCardWithLeaders"),
-                                    InlineKeyboardButton("League", callback_data="standings_byLeague"))
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Division", callback_data="standings_Division"),
+                                    InlineKeyboardButton("Wild Card", callback_data="standings_WildCard"),
+                                    InlineKeyboardButton("League", callback_data="standings_League"))
 
     return kb
 

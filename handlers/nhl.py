@@ -17,7 +17,7 @@ async def command_standings_type(callback: types.CallbackQuery):
     try:
         #await callback.message.answer(
         await callback.message.edit_text(
-            f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(standings_type, full=False)}",
+            f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(standings_type, full=True)}",
             parse_mode="HTML",
             reply_markup=keyboards.keyboard_standings())
         await callback.answer()

@@ -138,63 +138,96 @@ def get_teams_for_settings():
 
 
 # Получение от сервера данных турнирной таблицы
-def get_standings_data(standingsType=None):
-    standings_str = "/standings" + (f"/{standingsType}" if (standingsType) else '')
+def get_standings_data():
+    standings_str = "standings/now"
 
     data = get_request_nhl_api(standings_str)
 
-    return data['records']
+    return data['standings']
 
 
 # Формирование теста для вывода турнирной таблицы в зависимости от типа
 def get_standings_text(standingsType=None, full=False):
+    data = get_standings_data()
+
     match standingsType:
-        case 'byLeague':
-            txt = get_standings_league_text(full)
+        case 'League':
+            txt = get_standings_league_text(data, full)
 
-        case 'wildCardWithLeaders':
-            txt = get_standings_wildcard_text(full)
+        case 'WildCard':
+            txt = get_standings_wildcard_text(data, full)
 
-        case 'byDivision':
-            txt = get_standings_division_text(full)
+        case 'Division':
+            txt = get_standings_division_text(data, full)
 
         case _:
-            txt = get_standings_division_text(full)
+            txt = get_standings_division_text(data, full)
 
     return txt
 
 
 # Формирование теста для вывода турнирной таблицы с разбивкой по дивизионам
-def get_standings_division_text(full=False):
-    # full = True
-    data = get_standings_data()
+def get_standings_division_text(data, full=False):
+
+    divisions = {'Atlantic': [],
+                 'Metropolitan': [],
+                 'Central': [],
+                 'Pacific': []}
+
+    for team in data:
+        # if team['divisionName'] not in divisions:
+        #     divisions.setdefault(team['divisionName'], [])
+        divisions[team['divisionName']].append(team)
+
+    for d in divisions.values():
+        d = sorted(d, key=lambda d: d['divisionSequence'])
 
     txt = "<pre>"
     in_po_symbol = '*'
     # in_po_symbol = emojize(':star:')
-    for div in data:
+    for div_name, div in divisions.items():
         if (full):
-            txt += f"\n#|{div['division']['name'].center(22, '_')}|GP|W |L |O |Pt\n"
+            txt += f"\n#|{div_name.center(22, '_')}|GP|W_|L_|OT|Pts\n"
         else:
-            txt += f"\n#|{div['division']['name'].center(22, '_')}|GP|Pt\n"
+            txt += f"\n#|{div_name.center(22, '_')}|GP|Pts\n"
 
-        for team in div['teamRecords']:
-            in_po = in_po_symbol if (int(team['wildCardRank']) < 3) else (' ')
+        for team in div:
+            in_po = in_po_symbol if (team['wildcardSequence'] < 3) else (' ')
             if (full):
-                txt += f"{team['divisionRank']}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
+                txt += f"{team['divisionSequence']}|" \
+                       f"{team['teamName']['default'].ljust(21)}{in_po}|" \
+                       f"{str(team['gamesPlayed']).rjust(2)}|" \
+                       f"{str(team['wins']).rjust(2)}|" \
+                       f"{str(team['losses']).rjust(2)}|" \
+                       f"{str(team['otLosses']).rjust(2)}|" \
+                       f"{str(team['points']).rjust(3)}\n"
             else:
-                txt += f"{team['divisionRank']}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
+                txt += f"{team['divisionSequence']}|" \
+                       f"{team['teamName']['default'].ljust(21)}{in_po}|" \
+                       f"{str(team['gamesPlayed']).rjust(2)}|" \
+                       f"{str(team['points']).rjust(3)}\n"
 
     return txt + "</pre>"
 
 
 # Формирование теста для вывода турнирной таблицы с разбивкой по дивизионам с Wild Card
-def get_standings_wildcard_text(full=False):
-    # full = True
-    data = get_standings_data('wildCardWithLeaders')
+def get_standings_wildcard_text(data, full=False):
 
-    conferences = {'Eastern': {'divisions': [*data[2:4]], 'wild': data[0]},
-                   'Western': {'divisions': [*data[4:]], 'wild': data[1]}}
+    conferences = {'Eastern': {'Atlantic': [], 'Metropolitan': [], 'WildCard': []},
+                   'Western': {'Central': [], 'Pacific': [], 'WildCard': []}}
+
+    for team in data:
+        if (team['wildcardSequence']):
+            conferences[team['conferenceName']]['WildCard'].append(team)
+        else:
+            conferences[team['conferenceName']][team['divisionName']].append(team)
+
+    for c in conferences.values():
+        for name, d in c.items():
+            if (name == 'WildCard'):
+                d = sorted(d, key=lambda d: d['wildcardSequence'])
+            else:
+                d = sorted(d, key=lambda d: d['divisionSequence'])
 
     txt = ""
     in_po_symbol = '*'
@@ -203,30 +236,30 @@ def get_standings_wildcard_text(full=False):
         txt += f"\n<b>{conf_name}</b>\n"
         txt += "<pre>"
 
-        for div in conf['divisions']:
+        for div_name, div in conf.items():
             if (full):
-                txt += f"\n #|{div['division']['name'].center(22, '_')}|GP|W |L |O |Pt\n"
+                txt += f"\n #|{div_name.center(22, '_')}|GP|W_|L_|OT|Pts\n"
             else:
-                txt += f"\n #|{div['division']['name'].center(22, '_')}|GP|Pt\n"
+                txt += f"\n #|{div_name.center(22, '_')}|GP|Pts\n"
 
-            for team in div['teamRecords']:
-                in_po = in_po_symbol if (int(team['wildCardRank']) < 3) else (' ')
+            for team in div:
+                in_po = in_po_symbol if (team['wildcardSequence'] < 3) else (' ')
+
+                n = team['wildcardSequence'] if (div_name == 'WildCard') else team['divisionSequence']
+
                 if (full):
-                    txt += f"{team['divisionRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
+                    txt += f"{str(n).rjust(2)}|" \
+                           f"{team['teamName']['default'].ljust(21)}{in_po}|" \
+                           f"{str(team['gamesPlayed']).rjust(2)}|" \
+                           f"{str(team['wins']).rjust(2)}|" \
+                           f"{str(team['losses']).rjust(2)}|" \
+                           f"{str(team['otLosses']).rjust(2)}|" \
+                           f"{str(team['points']).rjust(3)}\n"
                 else:
-                    txt += f"{team['divisionRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
-
-        if (full):
-            txt += f"\n #|{'Wild Card'.center(22, '_')}|GP|W |L |O |Pt\n"
-        else:
-            txt += f"\n #|{'Wild Card'.center(22, '_')}|GP|Pt\n"
-
-        for team in conf['wild']['teamRecords']:
-            in_po = in_po_symbol if (int(team['wildCardRank']) < 3) else (' ')
-            if (full):
-                txt += f"{team['wildCardRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
-            else:
-                txt += f"{team['wildCardRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
+                    txt += f"{str(n).rjust(2)}|" \
+                           f"{team['teamName']['default'].ljust(21)}{in_po}|" \
+                           f"{str(team['gamesPlayed']).rjust(2)}|" \
+                           f"{str(team['points']).rjust(3)}\n"
 
         txt += "</pre>"
 
@@ -234,25 +267,31 @@ def get_standings_wildcard_text(full=False):
 
 
 # Формирование теста для вывода общей турнирной таблицы
-def get_standings_league_text(full=False):
-    # full = True
-    data = get_standings_data('byLeague')
+def get_standings_league_text(data, full=False):
 
     txt = "<pre>"
     in_po_symbol = '*'
     # in_po_symbol = emojize(':star:')
-
     if (full):
-        txt += f"\n #|{'NHL'.center(22, '_')}|GP|W |L |O |Pt\n"
+        txt += f"\n #|{'NHL'.center(22, '_')}|GP|W_|L_|OT|Pts\n"
     else:
-        txt += f"\n #|{'NHL'.center(22, '_')}|GP|Pt\n"
+        txt += f"\n #|{'NHL'.center(22, '_')}|GP|Pts\n"
 
-    for team in data[0]['teamRecords']:
-        in_po = in_po_symbol if (int(team['wildCardRank']) < 3) else (' ')
+    for team in data:
+        in_po = in_po_symbol if (team['wildcardSequence'] < 3) else (' ')
         if (full):
-            txt += f"{team['leagueRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{str(team['leagueRecord']['wins']).ljust(2, ' ')}|{str(team['leagueRecord']['losses']).ljust(2, ' ')}|{str(team['leagueRecord']['ot']).ljust(2, ' ')}|{team['points']}\n"
+            txt += f"{str(team['leagueSequence']).rjust(2)}|" \
+                   f"{team['teamName']['default'].ljust(21)}{in_po}|" \
+                   f"{str(team['gamesPlayed']).rjust(2)}|" \
+                   f"{str(team['wins']).rjust(2)}|" \
+                   f"{str(team['losses']).rjust(2)}|" \
+                   f"{str(team['otLosses']).rjust(2)}|" \
+                   f"{str(team['points']).rjust(3)}\n"
         else:
-            txt += f"{team['leagueRank'].rjust(2, ' ')}|{team['team']['name'].ljust(21, ' ')}{in_po}|{team['gamesPlayed']}|{team['points']}\n"
+            txt += f"{str(team['leagueSequence']).rjust(2)}|" \
+                   f"{team['teamName']['default'].ljust(21)}{in_po}|" \
+                   f"{str(team['gamesPlayed']).rjust(2)}|" \
+                   f"{str(team['points']).rjust(3)}\n"
 
     return txt + "</pre>"
 
