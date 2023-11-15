@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters import Text
 
 async def command_standings(message: types.Message):
     await message.answer(
-        f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(full=False)}",
+        f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(full=True)}",
         parse_mode="HTML",
         reply_markup=keyboards.keyboard_standings())
 
