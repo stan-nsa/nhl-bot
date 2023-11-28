@@ -154,7 +154,7 @@ def game_details_text(data, type_details: str):
                     penalty_team = penalty['teamAbbrev']  # Команда нарушителя
                     penalty_minutes = penalty['duration']  # Срок отбывания нарушения
                     penalty_desc = penalty['descKey']  # Описание нарушения
-                    penalty_player = penalty['committedByPlayer']  # Оштрафованный игрок
+                    penalty_player = penalty['committedByPlayer'] if ('committedByPlayer' in penalty) else '' # Оштрафованный игрок
 
                     txt += f"\n<b>{penalty_time}</b> ({penalty_team}) {nhl.ico['penalty']} {penalty_player}: {penalty_desc} ({penalty_minutes} min.)\n"
 
