@@ -126,16 +126,16 @@ def game_details_text(data, type_details: str):
 
                 for goal in period['goals']:
                     score_teams = f"{goal['awayScore']}:{goal['homeScore']}"    # Счёт
-                    score_team = f"{goal['teamAbbrev']}"  # Забившая команда
+                    score_team = f"{goal['teamAbbrev']['default']}"  # Забившая команда
                     score_time = f"{goal['timeInPeriod']}"  # Время изменения счёта (м:с)
                     score_strength = f"({nhl.goalType[goal['strength']]}) " if (goal['strength'] != 'ev') else ''
-                    score_player = f"{goal['firstName']} {goal['lastName']}"
+                    score_player = f"{goal['name']['default']}"
                     score_player_goals = f"({goal['goalsToDate']})" if (period['periodDescriptor']['periodType'] != 'SO') else ''
 
                     score_assists = ''
                     for assist in goal['assists']:
                         score_assists += ', ' if len(score_assists) else ''
-                        score_assists += f"{assist['firstName']} {assist['lastName']} ({assist['assistsToDate']})"
+                        score_assists += f"{assist['name']['default']} ({assist['assistsToDate']})"
 
                     txt += f"\n<b>{score_teams}</b> ({score_team}) ({score_time}) {nhl.ico['goal']} {score_strength}{score_player} {score_player_goals}\n"
                     txt += f" assists: {score_assists}\n" if len(score_assists) else ''
