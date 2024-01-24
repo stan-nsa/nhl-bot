@@ -18,6 +18,8 @@
 # ESPN News
 # http://site.api.espn.com/apis/site/v2/sports/hockey/nhl/news?limit=15
 
+# https://api.nhle.com/stats/rest/en/componentSeason - (возможно, можно будет использовать для определения стадии сезона: предсезонка, регулярка, ПО)
+
 
 import requests
 from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/   https://k3a.me/telegram-emoji-list-codes-descriptions/

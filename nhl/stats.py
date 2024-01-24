@@ -64,9 +64,13 @@ def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10,
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
-    gamesPlayed = nhl.gameType[gameType]['min_games_played_goalies']
+    season_data = nhl.get_season_current()
 
-    seasonId = nhl.get_season_current()['id']
+    #gamesPlayed = nhl.gameType[gameType]['min_games_played_goalies']
+    gamesPlayed = season_data['minimumRegularGamesForGoalieStatsLeaders']
+    minutesPlayed = season_data['minimumPlayoffMinutesForGoalieStatsLeaders']
+
+    seasonId = season_data['id']
 
     query_str = 'goalie/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
