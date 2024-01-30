@@ -4,6 +4,7 @@
 #standings - Турнирная таблица
 #stats - Статистика игроков
 #stats_teams - Статистика команд
+#teams - Информация по командам
 
 
 # NHL API Documentation:
@@ -180,37 +181,17 @@ def get_standings_division_text(data, full=False):
                  'Pacific': []}
 
     for team in data:
-        # if team['divisionName'] not in divisions:
-        #     divisions.setdefault(team['divisionName'], [])
         divisions[team['divisionName']].append(team)
 
     for d in divisions.values():
         d = sorted(d, key=lambda d: d['divisionSequence'])
 
     txt = "<pre>"
-    in_po_symbol = '*'
-    # in_po_symbol = emojize(':star:')
     for div_name, div in divisions.items():
-        if (full):
-            txt += f"\n#|{div_name.center(22, '_')}|GP|W_|L_|OT|Pts\n"
-        else:
-            txt += f"\n#|{div_name.center(22, '_')}|GP|Pts\n"
+        txt += get_standings_table_header_text(caption=div_name, full=full)
 
         for team in div:
-            in_po = in_po_symbol if (team['wildcardSequence'] < 3) else (' ')
-            if (full):
-                txt += f"{team['divisionSequence']}|" \
-                       f"{team['teamName']['default'].ljust(21)}{in_po}|" \
-                       f"{str(team['gamesPlayed']).rjust(2)}|" \
-                       f"{str(team['wins']).rjust(2)}|" \
-                       f"{str(team['losses']).rjust(2)}|" \
-                       f"{str(team['otLosses']).rjust(2)}|" \
-                       f"{str(team['points']).rjust(3)}\n"
-            else:
-                txt += f"{team['divisionSequence']}|" \
-                       f"{team['teamName']['default'].ljust(21)}{in_po}|" \
-                       f"{str(team['gamesPlayed']).rjust(2)}|" \
-                       f"{str(team['points']).rjust(3)}\n"
+            txt += get_standings_table_row_text(row=team, rank=team['divisionSequence'], full=full)
 
     return txt + "</pre>"
 
@@ -235,36 +216,17 @@ def get_standings_wildcard_text(data, full=False):
                 d = sorted(d, key=lambda d: d['divisionSequence'])
 
     txt = ""
-    in_po_symbol = '*'
-    # in_po_symbol = emojize(':star:')
     for conf_name, conf in conferences.items():
         txt += f"\n<b>{conf_name}</b>\n"
         txt += "<pre>"
 
         for div_name, div in conf.items():
-            if (full):
-                txt += f"\n #|{div_name.center(22, '_')}|GP|W_|L_|OT|Pts\n"
-            else:
-                txt += f"\n #|{div_name.center(22, '_')}|GP|Pts\n"
+            txt += get_standings_table_header_text(caption=div_name, full=full)
 
             for team in div:
-                in_po = in_po_symbol if (team['wildcardSequence'] < 3) else (' ')
-
                 n = team['wildcardSequence'] if (div_name == 'WildCard') else team['divisionSequence']
 
-                if (full):
-                    txt += f"{str(n).rjust(2)}|" \
-                           f"{team['teamName']['default'].ljust(21)}{in_po}|" \
-                           f"{str(team['gamesPlayed']).rjust(2)}|" \
-                           f"{str(team['wins']).rjust(2)}|" \
-                           f"{str(team['losses']).rjust(2)}|" \
-                           f"{str(team['otLosses']).rjust(2)}|" \
-                           f"{str(team['points']).rjust(3)}\n"
-                else:
-                    txt += f"{str(n).rjust(2)}|" \
-                           f"{team['teamName']['default'].ljust(21)}{in_po}|" \
-                           f"{str(team['gamesPlayed']).rjust(2)}|" \
-                           f"{str(team['points']).rjust(3)}\n"
+                txt += get_standings_table_row_text(row=team, rank=n, full=full)
 
         txt += "</pre>"
 
@@ -275,30 +237,53 @@ def get_standings_wildcard_text(data, full=False):
 def get_standings_league_text(data, full=False):
 
     txt = "<pre>"
-    in_po_symbol = '*'
-    # in_po_symbol = emojize(':star:')
-    if (full):
-        txt += f"\n #|{'NHL'.center(22, '_')}|GP|W_|L_|OT|Pts\n"
-    else:
-        txt += f"\n #|{'NHL'.center(22, '_')}|GP|Pts\n"
+
+    txt += get_standings_table_header_text(caption='NHL', full=full)
 
     for team in data:
-        in_po = in_po_symbol if (team['wildcardSequence'] < 3) else (' ')
-        if (full):
-            txt += f"{str(team['leagueSequence']).rjust(2)}|" \
-                   f"{team['teamName']['default'].ljust(21)}{in_po}|" \
-                   f"{str(team['gamesPlayed']).rjust(2)}|" \
-                   f"{str(team['wins']).rjust(2)}|" \
-                   f"{str(team['losses']).rjust(2)}|" \
-                   f"{str(team['otLosses']).rjust(2)}|" \
-                   f"{str(team['points']).rjust(3)}\n"
-        else:
-            txt += f"{str(team['leagueSequence']).rjust(2)}|" \
-                   f"{team['teamName']['default'].ljust(21)}{in_po}|" \
-                   f"{str(team['gamesPlayed']).rjust(2)}|" \
-                   f"{str(team['points']).rjust(3)}\n"
+        txt += get_standings_table_row_text(row=team, rank=team['leagueSequence'], full=full)
 
     return txt + "</pre>"
+
+
+# Формирование теста для вывода заголовка турнирной таблицы
+def get_standings_table_header_text(caption, full=False):
+
+    txt = ""
+
+    if (full):
+        txt += f"\n #|{caption.center(22, '_')}|GP|W_|L_|OT|Pts\n"
+    else:
+        txt += f"\n #|{caption.center(22, '_')}|GP|Pts\n"
+
+    return txt
+
+
+# Формирование теста для вывода строки турнирной таблицы
+def get_standings_table_row_text(row, rank, full=False):
+
+    in_po_symbol = '*'
+    #in_po_symbol = emojize(':star:')
+
+    txt = ""
+
+    in_po = in_po_symbol if (row['wildcardSequence'] < 3) else (' ')
+
+    if (full):
+        txt += f"{str(rank).rjust(2)}|" \
+               f"{row['teamName']['default'].ljust(21)}{in_po}|" \
+               f"{str(row['gamesPlayed']).rjust(2)}|" \
+               f"{str(row['wins']).rjust(2)}|" \
+               f"{str(row['losses']).rjust(2)}|" \
+               f"{str(row['otLosses']).rjust(2)}|" \
+               f"{str(row['points']).rjust(3)}\n"
+    else:
+        txt += f"{str(rank).rjust(2)}|" \
+               f"{row['teamName']['default'].ljust(21)}{in_po}|" \
+               f"{str(row['gamesPlayed']).rjust(2)}|" \
+               f"{str(row['points']).rjust(3)}\n"
+
+    return txt
 
 
 # Краткое ФИО (И.Фамилия)
