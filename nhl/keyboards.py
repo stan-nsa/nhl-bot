@@ -103,3 +103,20 @@ def keyboard_stats_teams(gameType='regular'):
 
     return kb
 
+
+#-- Keyboard for Teams ----------------------------------------------------------------------------
+def keyboard_teams(teams):
+    kb = InlineKeyboardMarkup()
+
+    for team in teams:
+        kb.add(InlineKeyboardButton(team['teamName']['default'], callback_data=f"team_{team['teamAbbrev']['default']}"))
+
+    return kb
+
+
+def keyboard_team(teamAbbrev):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['info']}Info", callback_data=f"team_{teamAbbrev}_info"),
+                                    InlineKeyboardButton(f"{ico['stats']}Stats", callback_data=f"team_{teamAbbrev}_stats"),
+                                    InlineKeyboardButton(f"{ico['schedule']}Schedule", callback_data=f"team_{teamAbbrev}_schedule"))
+
+    return kb

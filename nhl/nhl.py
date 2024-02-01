@@ -13,7 +13,7 @@
 # Scores: https://api-web.nhle.com/v1/score/now
 #         https://api-web.nhle.com/v1/score/2023-11-10
 
-# Season (current):  https://statsapi.web.nhl.com/api/v1/seasons/current
+# Season (current):
 # https://api.nhle.com/stats/rest/en/season?sort=[{"property":"id","direction":"DESC"}]&limit=1
 
 # ESPN News
@@ -126,19 +126,55 @@ def get_season_current():
 
 # Получение от сервера данных о командах
 def get_teams():
-    teams_str = '/teams'
 
-    data = get_request_nhl_api(teams_str)
+    data = get_standings_data()
+    teams = sorted(data, key=lambda t: t['teamName']['default'])
 
-    return data['teams']
+    return teams
 
 
 # Формирование текста списка команд
-def get_teams_for_settings():
-    teams = get_teams()
+def get_team_info(teamAbbrev):
+    teams = get_standings_data()
+    team = list(filter(lambda t: t['teamAbbrev']['default'] == teamAbbrev, teams))[0]
+
     txt = ""
-    for team in teams:
-        txt += f"{team['name']}\n"
+    txt += f"<b>{team['teamName']['default']}</b>\n"
+    # Rank
+    txt += "\n<b>Rank:</b>\n"
+    txt += f"Division: #{team['divisionSequence']} | Conference: #{team['conferenceSequence']} | League: #{team['leagueSequence']}\n"
+
+    # Stats
+    # PP
+    pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct')['data']
+    pp_rank = pp = 0
+    for t in pp_data:
+        pp_rank += 1
+        if t['teamFullName'] == team['teamName']['default']:
+            pp = round(t['powerPlayPct']*100, 1)
+            break
+    # PK
+    pk_data = stats.get_stats_teams_data_byProperty(property='penaltyKillPct')['data']
+    pk_rank = pk = 0
+    for t in pk_data:
+        pk_rank += 1
+        if t['teamFullName'] == team['teamName']['default']:
+            pk = round(t['penaltyKillPct'] * 100, 1)
+            break
+
+    txt += "\n<b>Team Stats:</b>\n"
+    n = 12
+    txt += "<code>"
+    txt += "Points".ljust(n) + f" | {team['points']}\n"
+    txt += "Games Played".ljust(n) + f" | {team['gamesPlayed']}\n"
+    txt += "W-L-OT".ljust(n) + f" | {team['wins']}-{team['losses']}-{team['otLosses']}\n"
+    txt += "home".rjust(n) + f" | {team['homeWins']}-{team['homeLosses']}-{team['homeOtLosses']}\n"
+    txt += "away".rjust(n) + f" | {team['roadWins']}-{team['roadLosses']}-{team['roadOtLosses']}\n"
+    txt += "last10".rjust(n) + f" | {team['l10Wins']}-{team['l10Losses']}-{team['l10OtLosses']}\n"
+    txt += "Streak".ljust(n) + f" | {team['streakCode'] + str(team['streakCount'])}\n"
+    txt += "PP%".ljust(n) + f" | {pp} (#{pp_rank})\n"
+    txt += "PK%".ljust(n) + f" | {pk} (#{pk_rank})\n"
+    txt += "</code>\n"
 
     return txt
 

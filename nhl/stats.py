@@ -322,15 +322,16 @@ def get_stats_rookies_text(full=False):
 
 #-- Статистика команд -------------------------------------------------------------------------
 # Получение данных статистики команд по указанному стат.показателю
-def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular'):
+def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular', teamFullName=''):
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
     seasonId = nhl.get_season_current()['id']
 
-    query_str = 'team/summary?isAggregate=false&isGame=false'
+    query_str = "team/summary?isAggregate=false&isGame=false"
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
-    query_str_exp = f'&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
+    query_str_exp = f"&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}" + \
+                    (f" and teamFullName='{teamFullName}'" if (teamFullName != '') else "")
 
     query_str += query_str_sort + query_str_exp
 
