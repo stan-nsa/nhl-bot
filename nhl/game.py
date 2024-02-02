@@ -27,79 +27,81 @@ def get_game_data(game_id):
 def get_game_text(game_id, details='scoring'):
     data = get_game_data(game_id)
 
-    boxscore = data['boxscore']
-    landing = data['landing']
+    boxscore = data.get('boxscore')
+    landing = data.get('landing')
 
     txt_game_summary = ''
     txt_game_details = ''
     txt_team_away_score = ''
     txt_team_home_score = ''
 
-    team_away = f"{landing['awayTeam']['placeName']['default']} {boxscore['awayTeam']['name']['default']}"
-    team_home = f"{landing['homeTeam']['placeName']['default']} {boxscore['homeTeam']['name']['default']}"
+    team_away = f"{landing.get('awayTeam').get('placeName').get('default')} {boxscore.get('awayTeam').get('name').get('default')}"
+    team_home = f"{landing.get('homeTeam').get('placeName').get('default')} {boxscore.get('homeTeam').get('name').get('default')}"
 
     # -- Статистика команд --
-    query_str = f"team/summary?cayenneExp=gameTypeId={boxscore['gameType']} and seasonId={boxscore['season']} and teamId in ({boxscore['awayTeam']['id']},{boxscore['homeTeam']['id']})"
-    data_stats = stats.get_request_nhl_stats_api(query_str)
-    team_away_stats = data_stats['data'][0] if (data_stats['data'][0]['teamId'] == boxscore['awayTeam']['id']) else data_stats['data'][1]
-    team_home_stats = data_stats['data'][1] if (data_stats['data'][1]['teamId'] == boxscore['homeTeam']['id']) else data_stats['data'][0]
+    team_away_w_l_o = team_home_w_l_o = ''
+    query_str = f"team/summary?cayenneExp=gameTypeId={boxscore.get('gameType')} and seasonId={boxscore.get('season')} and teamId in ({boxscore.get('awayTeam').get('id')},{boxscore.get('homeTeam').get('id')})"
+    data_stats = stats.get_request_nhl_stats_api(query_str).get('data')
+    if len(data_stats) > 1:
+        team_away_stats = data_stats[0] if (data_stats[0].get('teamId') == boxscore.get('awayTeam').get('id')) else data_stats[1]
+        team_home_stats = data_stats[1] if (data_stats[1].get('teamId') == boxscore.get('homeTeam').get('id')) else data_stats[0]
 
-    #-- Статистика команд на момент матча: (wins-losses-ot) --
-    team_away_w_l_o = f"({team_away_stats['wins']}-{team_away_stats['losses']}" + \
-                      (f"-{team_away_stats['otLosses']})" if (boxscore['gameType'] == nhl.gameType['regular']['id']) else f")")
-    team_home_w_l_o = f"({team_home_stats['wins']}-{team_home_stats['losses']}" + \
-                      (f"-{team_home_stats['otLosses']})" if (boxscore['gameType'] == nhl.gameType['regular']['id']) else f")")
+        #-- Статистика команд на момент матча: (wins-losses-ot) --
+        team_away_w_l_o = f"({team_away_stats.get('wins')}-{team_away_stats.get('losses')}" + \
+                          (f"-{team_away_stats.get('otLosses')})" if (boxscore.get('gameType') == nhl.gameType.get('regular').get('id')) else f")")
+        team_home_w_l_o = f"({team_home_stats.get('wins')}-{team_home_stats.get('losses')}" + \
+                          (f"-{team_home_stats.get('otLosses')})" if (boxscore.get('gameType') == nhl.gameType.get('regular').get('id')) else f")")
 
     # -- Информация о текущей серии ПО (Game #, Team lead) --
     series_summary = ""
-    if boxscore['gameType'] == nhl.gameType['playoff']['id']:
-        query_str = f"club-schedule/{boxscore['awayTeam']['abbrev']}/week/{boxscore['gameDate']}"
+    if boxscore.get('gameType') == nhl.gameType.get('playoff').get('id'):
+        query_str = f"club-schedule/{boxscore.get('awayTeam').get('abbrev')}/week/{boxscore.get('gameDate')}"
         data_series = nhl.get_request_nhl_api(query_str)
-        series_status = data_series['games'][0]['seriesStatus']
+        series_status = data_series.get('games')[0].get('seriesStatus')
 
-        if series_status['awayTeamWins'] == series_status['homeTeamWins']:
+        if series_status.get('awayTeamWins') == series_status.get('homeTeamWins'):
             series_score = "Tied"
-        elif series_status['awayTeamWins'] > series_status['homeTeamWins']:
-            series_score = f"{boxscore['awayTeam']['abbrev']}"
+        elif series_status.get('awayTeamWins') > series_status.get('homeTeamWins'):
+            series_score = f"{boxscore.get('awayTeam').get('abbrev')}"
         else:
-            series_score = f"{boxscore['homeTeam']['abbrev']}"
+            series_score = f"{boxscore.get('homeTeam').get('abbrev')}"
 
-        series_score += f" {series_status['awayTeamWins']}-{series_status['homeTeamWins']}"
+        series_score += f" {series_status.get('awayTeamWins')}-{series_status.get('homeTeamWins')}"
 
-        series_summary = f"({series_status['roundAbbrev']} G{series_status['gameNumberOfSeries']} | {series_score})"
+        series_summary = f"({series_status.get('roundAbbrev')} G{series_status.get('gameNumberOfSeries')} | {series_score})"
     # --------------------------------------------------------
 
     # Scheduled
-    if boxscore['gameState'] in nhl.gameState['scheduled']:
-        txt_game_status = f"{nhl.ico['time']} <b>Scheduled:</b> {nhl.ico['time']}{schedule.get_game_time_tz_text(boxscore['startTimeUTC'], withTZ=True, inlinemenu=True)}"
+    if boxscore.get('gameState') in nhl.gameState.get('scheduled'):
+        txt_game_status = f"{nhl.ico.get('time')} <b>Scheduled:</b> {nhl.ico.get('time')}{schedule.get_game_time_tz_text(boxscore.get('startTimeUTC'), withTZ=True, inlinemenu=True)}"
 
     # Live
-    elif boxscore['gameState'] in nhl.gameState['live']:
-        currentPeriod = boxscore['periodDescriptor']['periodType'] if boxscore['period'] > 3 else nhl.gamePeriods[boxscore['periodDescriptor']['number']]
-        txt_game_status = f"{nhl.ico['live']} <b>Live: {currentPeriod} / {'END' if (boxscore['clock']['inIntermission']) else boxscore['clock']['timeRemaining']}</b>"
-        txt_team_away_score = schedule.get_game_team_score_text(boxscore['awayTeam']['score'])
-        txt_team_home_score = schedule.get_game_team_score_text(boxscore['homeTeam']['score'])
+    elif boxscore.get('gameState') in nhl.gameState.get('live'):
+        currentPeriod = boxscore.get('periodDescriptor').get('periodType') if boxscore.get('period') > 3 else nhl.gamePeriods[boxscore.get('periodDescriptor').get('number')]
+        txt_game_status = f"{nhl.ico.get('live')} <b>Live: {currentPeriod} / {'END' if (boxscore.get('clock').get('inIntermission')) else boxscore.get('clock').get('timeRemaining')}</b>"
+        txt_team_away_score = schedule.get_game_team_score_text(boxscore.get('awayTeam').get('score'))
+        txt_team_home_score = schedule.get_game_team_score_text(boxscore.get('homeTeam').get('score'))
         txt_game_summary = game_summary_text(landing)
         txt_game_details = game_details_text(data, details)
 
     # Final
-    elif boxscore['gameState'] in nhl.gameState['final']:
-        txt_game_status = f"{nhl.ico['finished']} <b>Finished:</b> {'' if boxscore['period'] == 3 else boxscore['periodDescriptor']['periodType']}"
-        txt_team_away_score = schedule.get_game_team_score_text(boxscore['awayTeam']['score'])
-        txt_team_home_score = schedule.get_game_team_score_text(boxscore['homeTeam']['score'])
+    elif boxscore.get('gameState') in nhl.gameState.get('final'):
+        txt_game_status = f"{nhl.ico.get('finished')} <b>Finished:</b> {'' if boxscore.get('period') == 3 else boxscore.get('periodDescriptor').get('periodType')}"
+        txt_team_away_score = schedule.get_game_team_score_text(boxscore.get('awayTeam').get('score'))
+        txt_team_home_score = schedule.get_game_team_score_text(boxscore.get('homeTeam').get('score'))
         txt_game_summary = game_summary_text(landing)
         txt_game_details = game_details_text(data, details)
 
     # TBD/Postponed
-    elif boxscore['gameState'] in nhl.gameState['tbd']:
-        txt_game_status = f"{nhl.ico['tbd']} <b>{boxscore['gameState']}</b>"
+    elif boxscore.get('gameState') in nhl.gameState.get('tbd'):
+        txt_game_status = f"{nhl.ico.get('tbd')} <b>{boxscore.get('gameState')}</b>"
 
     # Other
     else:
         txt_game_status = ""
 
     #-- Формирование текста вывода информации о матче -----
-    txt = f"{nhl.ico['schedule']} <b>{schedule.get_game_time_tz_text(boxscore['startTimeUTC'], withDate=True, withTZ=True, inlinemenu=True)}:</b>\n"
+    txt = f"{nhl.ico.get('schedule')} <b>{schedule.get_game_time_tz_text(boxscore.get('startTimeUTC'), withDate=True, withTZ=True, inlinemenu=True)}:</b>\n"
     txt += f"\n{txt_game_status}\n"
     txt += f"{txt_team_away_score} <b>{team_away}</b> {team_away_w_l_o}\n"
     txt += f"{txt_team_home_score} <b>{team_home}</b> {team_home_w_l_o}\n"
@@ -221,7 +223,7 @@ def game_teams_stats_text(data):
                 txt += f"_#|{players_pos.center(width_player_name, '_').upper()}|G|A|+-|S_|PM|_TOI_\n"  # Шапка таблицы статистики полевых
 
             for player in players:
-                player_number = str(player['sweaterNumber']).upper()
+                player_number = str(player['sweaterNumber'])
                 player_name = player['name']['default'].replace('. ', '.')
                 player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name-3]}..."
                 player_toi = player['toi']

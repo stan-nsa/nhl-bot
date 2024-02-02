@@ -121,60 +121,116 @@ def get_season_current():
 
     data = stats.get_request_nhl_stats_api(query_str)
 
-    return data['data'][0]
+    return data.get('data')[0]
 
 
 # Получение от сервера данных о командах
 def get_teams():
 
     data = get_standings_data()
-    teams = sorted(data, key=lambda t: t['teamName']['default'])
+    teams = sorted(data, key=lambda t: t.get('teamName').get('default'))
 
     return teams
 
 
-# Формирование текста списка команд
-def get_team_info(teamAbbrev):
-    teams = get_standings_data()
-    team = list(filter(lambda t: t['teamAbbrev']['default'] == teamAbbrev, teams))[0]
+# Формирование текста информации о команде
+def get_team_info(teamAbbrev_teamName):
+    teamAbbrev, teamName = teamAbbrev_teamName.split(':')
 
-    txt = ""
-    txt += f"<b>{team['teamName']['default']}</b>\n"
+    txt = f"<b>{teamName}</b>\n"
+
+    teams = get_standings_data()
+    team = list(filter(lambda t: t.get('teamAbbrev').get('default') == teamAbbrev, teams))[0]
+
     # Rank
     txt += "\n<b>Rank:</b>\n"
-    txt += f"Division: #{team['divisionSequence']} | Conference: #{team['conferenceSequence']} | League: #{team['leagueSequence']}\n"
+    n = 10
+    txt += "<code>"
+    txt += "Division".ljust(n) + f" | #{team.get('divisionSequence')}\n"
+    txt += "Conference".ljust(n) + f" | #{team.get('conferenceSequence')}\n"
+    txt += "League".ljust(n) + f" | #{team.get('leagueSequence')}\n"
+    txt += "WildCard".ljust(n) + f" | {'#' + str(team.get('wildcardSequence')) if team.get('wildcardSequence') else ''}\n"
+    txt += "</code>"
 
     # Stats
     # PP
-    pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct')['data']
-    pp_rank = pp = 0
-    for t in pp_data:
-        pp_rank += 1
-        if t['teamFullName'] == team['teamName']['default']:
-            pp = round(t['powerPlayPct']*100, 1)
-            break
+    pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct').get('data')
+    t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pp_data, 1)))[0]
+    pp = round(t[1].get('powerPlayPct') * 100, 1)
+    pp_rank = t[0]
     # PK
-    pk_data = stats.get_stats_teams_data_byProperty(property='penaltyKillPct')['data']
-    pk_rank = pk = 0
-    for t in pk_data:
-        pk_rank += 1
-        if t['teamFullName'] == team['teamName']['default']:
-            pk = round(t['penaltyKillPct'] * 100, 1)
-            break
+    pk_data = sorted(pp_data, key=lambda t: t.get('penaltyKillPct'), reverse=True)
+    t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pk_data, 1)))[0]
+    pk = round(t[1].get('penaltyKillPct') * 100, 1)
+    pk_rank = t[0]
 
     txt += "\n<b>Team Stats:</b>\n"
     n = 12
     txt += "<code>"
-    txt += "Points".ljust(n) + f" | {team['points']}\n"
-    txt += "Games Played".ljust(n) + f" | {team['gamesPlayed']}\n"
-    txt += "W-L-OT".ljust(n) + f" | {team['wins']}-{team['losses']}-{team['otLosses']}\n"
-    txt += "home".rjust(n) + f" | {team['homeWins']}-{team['homeLosses']}-{team['homeOtLosses']}\n"
-    txt += "away".rjust(n) + f" | {team['roadWins']}-{team['roadLosses']}-{team['roadOtLosses']}\n"
-    txt += "last10".rjust(n) + f" | {team['l10Wins']}-{team['l10Losses']}-{team['l10OtLosses']}\n"
-    txt += "Streak".ljust(n) + f" | {team['streakCode'] + str(team['streakCount'])}\n"
+    txt += "Points".ljust(n) + f" | {team.get('points')}\n"
+    txt += "Games Played".ljust(n) + f" | {team.get('gamesPlayed')}\n"
+    txt += "W-L-OT".ljust(n) + f" | {team.get('wins')}-{team.get('losses')}-{team.get('otLosses')}\n"
+    txt += "home".rjust(n) + f" | {team.get('homeWins')}-{team.get('homeLosses')}-{team.get('homeOtLosses')}\n"
+    txt += "away".rjust(n) + f" | {team.get('roadWins')}-{team.get('roadLosses')}-{team.get('roadOtLosses')}\n"
+    txt += "last10".rjust(n) + f" | {team.get('l10Wins')}-{team.get('l10Losses')}-{team.get('l10OtLosses')}\n"
+    txt += "Streak".ljust(n) + f" | {team.get('streakCode') + str(team.get('streakCount'))}\n"
+    txt += "GoalsFor".ljust(n) + f" | {team.get('goalFor')}\n"
+    txt += "GoalsAgainst".ljust(n) + f" | {team.get('goalAgainst')}\n"
     txt += "PP%".ljust(n) + f" | {pp} (#{pp_rank})\n"
     txt += "PK%".ljust(n) + f" | {pk} (#{pk_rank})\n"
     txt += "</code>\n"
+
+    txt += get_team_stats_players(teamAbbrev_teamName)
+
+    return txt
+
+
+def get_team_stats_players_data(teamAbbrev):
+    stats_str = f"club-stats/{teamAbbrev}/now"
+
+    data = get_request_nhl_api(stats_str)
+
+    return data
+
+
+def get_team_stats_players(teamAbbrev_teamName):
+    teamAbbrev, teamName = teamAbbrev_teamName.split(':')
+
+    width_player_name = 17  # Ширина поля имени игрока
+
+    txt = f"<b>{teamName}</b>\n"
+
+    data = get_team_stats_players_data(teamAbbrev)
+    skaters = sorted(data.get('skaters'), key=lambda s: s.get('points'), reverse=True)
+
+    txt += "<pre>"
+    txt += f"_#|{'Skaters'.center(width_player_name, '_').upper()}|Pos|GP|G |A |Pts|+- |PM\n"  # Шапка таблицы статистики полевых
+    player_number = 0
+    for player in skaters:
+        player_number += 1
+        player_name = player.get('lastName').get('default')
+        player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name - 3]}..."
+
+        txt += f"{str(player_number).rjust(2)}|" \
+               f"{player_name.ljust(width_player_name)}|"
+
+        player_pos = player.get('positionCode')
+        player_gp = player.get('gamesPlayed')
+        player_goals = player.get('goals')
+        player_assists = player.get('assists')
+        player_pts = player.get('points')
+        player_p_m = f"{'+' if (player.get('plusMinus') > 0) else ''}{player.get('plusMinus')}"
+        player_pim = player.get('penaltyMinutes')
+
+        txt += f" {player_pos} |" \
+               f"{str(player_gp).rjust(2)}|" \
+               f"{str(player_goals).rjust(2)}|" \
+               f"{str(player_assists).rjust(2)}|" \
+               f"{str(player_pts).rjust(3)}|" \
+               f"{player_p_m.rjust(3)}|" \
+               f"{str(player_pim).rjust(2)}\n"
+
+    txt += "</pre>"
 
     return txt
 
@@ -185,7 +241,7 @@ def get_standings_data():
 
     data = get_request_nhl_api(standings_str)
 
-    return data['standings']
+    return data.get('standings')
 
 
 # Формирование теста для вывода турнирной таблицы в зависимости от типа
@@ -217,17 +273,17 @@ def get_standings_division_text(data, full=False):
                  'Pacific': []}
 
     for team in data:
-        divisions[team['divisionName']].append(team)
+        divisions[team.get('divisionName')].append(team)
 
     for d in divisions.values():
-        d = sorted(d, key=lambda d: d['divisionSequence'])
+        d = sorted(d, key=lambda d: d.get('divisionSequence'))
 
     txt = "<pre>"
     for div_name, div in divisions.items():
         txt += get_standings_table_header_text(caption=div_name, full=full)
 
         for team in div:
-            txt += get_standings_table_row_text(row=team, rank=team['divisionSequence'], full=full)
+            txt += get_standings_table_row_text(row=team, rank=team.get('divisionSequence'), full=full)
 
     return txt + "</pre>"
 
@@ -239,17 +295,17 @@ def get_standings_wildcard_text(data, full=False):
                    'Western': {'Central': [], 'Pacific': [], 'WildCard': []}}
 
     for team in data:
-        if (team['wildcardSequence']):
-            conferences[team['conferenceName']]['WildCard'].append(team)
+        if (team.get('wildcardSequence')):
+            conferences.get(team.get('conferenceName')).get('WildCard').append(team)
         else:
-            conferences[team['conferenceName']][team['divisionName']].append(team)
+            conferences.get(team.get('conferenceName')).get(team.get('divisionName')).append(team)
 
     for c in conferences.values():
         for name, d in c.items():
             if (name == 'WildCard'):
-                d = sorted(d, key=lambda d: d['wildcardSequence'])
+                d = sorted(d, key=lambda d: d.get('wildcardSequence'))
             else:
-                d = sorted(d, key=lambda d: d['divisionSequence'])
+                d = sorted(d, key=lambda d: d.get('divisionSequence'))
 
     txt = ""
     for conf_name, conf in conferences.items():
@@ -260,7 +316,7 @@ def get_standings_wildcard_text(data, full=False):
             txt += get_standings_table_header_text(caption=div_name, full=full)
 
             for team in div:
-                n = team['wildcardSequence'] if (div_name == 'WildCard') else team['divisionSequence']
+                n = team.get('wildcardSequence') if (div_name == 'WildCard') else team.get('divisionSequence')
 
                 txt += get_standings_table_row_text(row=team, rank=n, full=full)
 
@@ -277,7 +333,7 @@ def get_standings_league_text(data, full=False):
     txt += get_standings_table_header_text(caption='NHL', full=full)
 
     for team in data:
-        txt += get_standings_table_row_text(row=team, rank=team['leagueSequence'], full=full)
+        txt += get_standings_table_row_text(row=team, rank=team.get('leagueSequence'), full=full)
 
     return txt + "</pre>"
 
@@ -303,21 +359,21 @@ def get_standings_table_row_text(row, rank, full=False):
 
     txt = ""
 
-    in_po = in_po_symbol if (row['wildcardSequence'] < 3) else (' ')
+    in_po = in_po_symbol if (row.get('wildcardSequence') < 3) else (' ')
 
     if (full):
         txt += f"{str(rank).rjust(2)}|" \
-               f"{row['teamName']['default'].ljust(21)}{in_po}|" \
-               f"{str(row['gamesPlayed']).rjust(2)}|" \
-               f"{str(row['wins']).rjust(2)}|" \
-               f"{str(row['losses']).rjust(2)}|" \
-               f"{str(row['otLosses']).rjust(2)}|" \
-               f"{str(row['points']).rjust(3)}\n"
+               f"{row.get('teamName').get('default').ljust(21)}{in_po}|" \
+               f"{str(row.get('gamesPlayed')).rjust(2)}|" \
+               f"{str(row.get('wins')).rjust(2)}|" \
+               f"{str(row.get('losses')).rjust(2)}|" \
+               f"{str(row.get('otLosses')).rjust(2)}|" \
+               f"{str(row.get('points')).rjust(3)}\n"
     else:
         txt += f"{str(rank).rjust(2)}|" \
-               f"{row['teamName']['default'].ljust(21)}{in_po}|" \
-               f"{str(row['gamesPlayed']).rjust(2)}|" \
-               f"{str(row['points']).rjust(3)}\n"
+               f"{row.get('teamName').get('default').ljust(21)}{in_po}|" \
+               f"{str(row.get('gamesPlayed')).rjust(2)}|" \
+               f"{str(row.get('points')).rjust(3)}\n"
 
     return txt
 

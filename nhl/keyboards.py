@@ -109,14 +109,34 @@ def keyboard_teams(teams):
     kb = InlineKeyboardMarkup()
 
     for team in teams:
-        kb.add(InlineKeyboardButton(team['teamName']['default'], callback_data=f"team_{team['teamAbbrev']['default']}"))
+        teamName = team.get('teamName').get('default')
+        teamAbbrev = team.get('teamAbbrev').get('default')
+        kb.add(InlineKeyboardButton(teamName, callback_data=f"team_{teamAbbrev}:{teamName}_info"))
+
+    # conferences = {'Eastern': {'Atlantic': [], 'Metropolitan': []},
+    #                'Western': {'Central': [], 'Pacific': []}}
+    #
+    # for team in teams:
+    #     conferences.get(team.get('conferenceName')).get(team.get('divisionName')).append(team)
+    #
+    # for c in conferences.values():
+    #     for name, d in c.items():
+    #         d = sorted(d, key=lambda d: d.get('divisionSequence'))
+    #
+    # for conf_name, conf in conferences.items():
+    #     txt += f"\n<b>{conf_name}</b>\n"
+    #     for div_name, div in conf.items():
+    #         # txt += get_standings_table_header_text(caption=div_name, full=full)
+    #         for team in div:
+    #             n = team.get('wildcardSequence') if (div_name == 'WildCard') else team.get('divisionSequence')
+    #             txt += get_standings_table_row_text(row=team, rank=n, full=full)
 
     return kb
 
 
-def keyboard_team(teamAbbrev):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['info']}Info", callback_data=f"team_{teamAbbrev}_info"),
-                                    InlineKeyboardButton(f"{ico['stats']}Stats", callback_data=f"team_{teamAbbrev}_stats"),
-                                    InlineKeyboardButton(f"{ico['schedule']}Schedule", callback_data=f"team_{teamAbbrev}_schedule"))
+def keyboard_team(teamAbbrev_teamName):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton(f"{ico['info']}Info", callback_data=f"team_{teamAbbrev_teamName}_info"),
+                                    InlineKeyboardButton(f"{ico['stats']}Stats", callback_data=f"team_{teamAbbrev_teamName}_stats"),
+                                    InlineKeyboardButton(f"{ico['schedule']}Schedule", callback_data=f"team_{teamAbbrev_teamName}_schedule"))
 
     return kb

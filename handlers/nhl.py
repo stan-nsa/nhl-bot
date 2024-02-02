@@ -31,19 +31,19 @@ async def command_standings_type(callback: types.CallbackQuery):
 async def command_teams(message: types.Message):
     teams = nhl.get_teams()
     await message.answer(
-        f"{nhl.ico['standings']}<b>Teams:</b>",
+        f"{nhl.ico['hockey']}<b>Teams:</b>",
         parse_mode="HTML",
         reply_markup=keyboards.keyboard_teams(teams))
 
 
 async def command_team_info(callback: types.CallbackQuery):
-    teamAbbrev = callback.data.split('_')[1]
+    teamAbbrev_teamName = callback.data.split('_')[1]
 
     try:
         await callback.message.answer(
-            f"{nhl.ico['standings']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev)}",
+            f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName)}",
             parse_mode="HTML",
-            reply_markup=keyboards.keyboard_team(teamAbbrev))
+            reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
         await callback.answer()
 
     except:
