@@ -202,14 +202,18 @@ def get_team_stats_players(teamAbbrev_teamName):
 
     data = get_team_stats_players_data(teamAbbrev)
     skaters = sorted(data.get('skaters'), key=lambda s: s.get('points'), reverse=True)
+    goalies = sorted(data.get('goalies'), key=lambda s: s.get('gamesPlayed'), reverse=True)
 
     txt += "<pre>"
+
+    # Skaters
     txt += f"_#|{'Skaters'.center(width_player_name, '_').upper()}|Pos|GP|G |A |Pts|+- |PM\n"  # Шапка таблицы статистики полевых
     player_number = 0
     for player in skaters:
         player_number += 1
-        player_name = player.get('lastName').get('default')
-        player_name = player_name if (len(player_name) <= width_player_name) else f"{player_name[:width_player_name - 3]}..."
+        player_name = short_player_name(firstName=player.get('firstName').get('default'), lastName=player.get('lastName').get('default'))
+        player_name = player_name if (len(player_name) <= width_player_name) else \
+                      f"{player_name[:width_player_name - 3]}..."
 
         txt += f"{str(player_number).rjust(2)}|" \
                f"{player_name.ljust(width_player_name)}|"
@@ -229,6 +233,31 @@ def get_team_stats_players(teamAbbrev_teamName):
                f"{str(player_pts).rjust(3)}|" \
                f"{player_p_m.rjust(3)}|" \
                f"{str(player_pim).rjust(2)}\n"
+
+    # Goalies
+    txt += "\n"
+    txt += f"#|{'Goalies'.center(width_player_name, '_').upper()}|GP|W |L |OT|SO|GAA |Sv%\n"  # Шапка таблицы статистики вратарей
+    player_number = 0
+    for player in goalies:
+        player_number += 1
+        player_name = short_player_name(firstName=player.get('firstName').get('default'), lastName=player.get('lastName').get('default'))
+        player_name = player_name if (len(player_name) <= width_player_name) else \
+                      f"{player_name[:width_player_name - 3]}..."
+
+        txt += f"{player_number}|" \
+               f"{player_name.ljust(width_player_name)}|"
+
+        player_goalsAgainstAverage = stats.decimal_value_to_str(player.get('goalsAgainstAverage'), decimal=2)
+        player_savePercentage = stats.decimal_value_to_str(player.get('savePercentage'), decimal=3)
+
+
+        txt += f"{str(player.get('gamesPlayed')).rjust(2)}|" \
+               f"{str(player.get('wins')).rjust(2)}|" \
+               f"{str(player.get('losses')).rjust(2)}|" \
+               f"{str(player.get('overtimeLosses')).rjust(2)}|" \
+               f"{str(player.get('shutouts')).rjust(2)}|" \
+               f"{player_goalsAgainstAverage.rjust(4)}|" \
+               f"{player_savePercentage.rjust(4)}\n"
 
     txt += "</pre>"
 
@@ -379,9 +408,13 @@ def get_standings_table_row_text(row, rank, full=False):
 
 
 # Краткое ФИО (И.Фамилия)
-def short_player_name(full_name):
-    name_parts = full_name.split()
-    name = ' '.join([(name_parts[0][:1] + '.'), *name_parts[1:]])
+def short_player_name(fullName=None, firstName=None, lastName=None):
+    if fullName:
+        name_parts = fullName.split()
+        name = ''.join([i[:1]+'.' for i in [*name_parts[:-1]]]) + name_parts[-1]
+    else:
+        name_parts = firstName.split()
+        name = ''.join([i[:1]+'.' for i in name_parts]) + lastName
 
     return name
 

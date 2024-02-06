@@ -23,10 +23,10 @@ from nhl import nhl
 NHL_STATS_API_URL = "https://api.nhle.com/stats/rest/en/"
 
 goalie_stats = {
-    'savePct': 'Sv%',
-    'goalsAgainstAverage': 'GGA',
-    'shutouts': 'SO',
-    'wins': 'W'
+    'savePct': {'desc': 'Sv%', 'decimal': 3},
+    'goalsAgainstAverage': {'desc': 'GGA', 'decimal': 2},
+    'shutouts': {'desc': 'SO', 'decimal': 0},
+    'wins': {'desc': 'W', 'decimal': 0}
 }
 
 skater_stats = {
@@ -56,6 +56,16 @@ game_stats = {
 def get_request_nhl_stats_api(query_str: str):
     response = requests.get(NHL_STATS_API_URL + query_str, params={"Content-Type": "application/json"}, proxies=nhl.proxies)
     return response.json()
+
+
+def decimal_value_to_str(value, decimal=0, without_leading_zero=True):
+    # Форматированный вывод числа с плав.точкой: f"{numObj:.{digits}f}"
+    s = f"{value:.{decimal}f}"
+
+    if without_leading_zero:
+        s = s[1:] if (0 < value < 1) else s
+
+    return s
 
 
 #-- Статистика вратарей ---------------------------------------------------------------------------
@@ -88,23 +98,15 @@ def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10,
 
 # Формирование теста для вывода вратарской статистики
 def get_stats_goalies_text_fromData(data, full=False):
-    #full = True
     txt = "<pre>"
 
-    if (full):
-        txt += f"\n #|{'Goalie'.center(21, '_')}|{goalie_stats[data['stata']]}\n"
-    else:
-        txt += f"\n #|{'Goalie'.center(21, '_')}|{goalie_stats[data['stata']]}\n"
+    txt += f"\n #|{'Goalie'.center(21, '_')}|{goalie_stats.get(data.get('stata')).get('desc')}\n"
 
     n = 0
-    for player in data['data']:
+    for player in data.get('data'):
         n += 1
-        if (full):
-            #txt += f"{str(n).rjust(2, ' ')}|{player['goalieFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['goalieFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
-        else:
-            # txt += f"{str(n).rjust(2, ' ')}|{player['goalieFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['goalieFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
+        value = decimal_value_to_str(player.get(data.get('stata')), decimal=goalie_stats.get(data.get('stata')).get('decimal'))
+        txt += f"{str(n).rjust(2)}|{player.get('goalieFullName').ljust(21)}|{value}\n"
 
     return txt + "</pre>"
 
@@ -119,13 +121,13 @@ def get_stats_goalies_byProperty_text(property: str, direction='DESC', limit=10,
 
 
 # Формирование теста для вывода вратарских статистик
-def get_stats_goalies_text(full=False):
-    text = get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=full)
-    text += get_stats_goalies_byProperty_text('savePct', full=full)
-    text += get_stats_goalies_byProperty_text('shutouts', full=full)
-    #text += get_stats_goalies_byProperty_text('wins', full=full)
-
-    return text
+# def get_stats_goalies_text(full=False):
+#     text = get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=full)
+#     text += get_stats_goalies_byProperty_text('savePct', full=full)
+#     text += get_stats_goalies_byProperty_text('shutouts', full=full)
+#     #text += get_stats_goalies_byProperty_text('wins', full=full)
+#
+#     return text
 
 
 #-- Статистика полевых ----------------------------------------------------------------------------
