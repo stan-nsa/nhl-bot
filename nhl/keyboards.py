@@ -111,7 +111,7 @@ def keyboard_teams(teams):
     for team in teams:
         teamName = team.get('teamName').get('default')
         teamAbbrev = team.get('teamAbbrev').get('default')
-        kb.add(InlineKeyboardButton(teamName, callback_data=f"team_{teamAbbrev}:{teamName}_info"))
+        kb.add(InlineKeyboardButton(teamName, callback_data=f"team_{teamAbbrev}:{teamName}_button"))
 
     # conferences = {'Eastern': {'Atlantic': [], 'Metropolitan': []},
     #                'Western': {'Central': [], 'Pacific': []}}

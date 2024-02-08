@@ -37,17 +37,28 @@ async def command_teams(message: types.Message):
 
 
 async def command_team_info(callback: types.CallbackQuery):
-    teamAbbrev_teamName = callback.data.split('_')[1]
+    teamAbbrev_teamName, info = callback.data.split('_')[1:]
 
-    try:
-        await callback.message.answer(
-            f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName)}",
-            parse_mode="HTML",
-            reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
-        await callback.answer()
+    if info == 'button':
+        try:
+            await callback.message.answer(
+                f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName, info='info')}",
+                parse_mode="HTML",
+                reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
+            await callback.answer()
 
-    except:
-        await callback.answer()
+        except:
+            await callback.answer()
+    else:
+        try:
+            await callback.message.edit_text(
+                f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName, info=info)}",
+                parse_mode="HTML",
+                reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
+            await callback.answer()
+
+        except:
+            await callback.answer()
 
 
 def register_handlers_nhl(dp: Dispatcher):

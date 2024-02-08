@@ -25,7 +25,7 @@
 import requests
 from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/   https://k3a.me/telegram-emoji-list-codes-descriptions/
 import pytz
-from nhl import stats
+from nhl import stats, schedule
 
 # from datetime import datetime, timezone, date, timedelta
 # import db
@@ -134,53 +134,61 @@ def get_teams():
 
 
 # Формирование текста информации о команде
-def get_team_info(teamAbbrev_teamName):
+def get_team_info(teamAbbrev_teamName, info):
     teamAbbrev, teamName = teamAbbrev_teamName.split(':')
 
     txt = f"<b>{teamName}</b>\n"
 
-    teams = get_standings_data()
-    team = list(filter(lambda t: t.get('teamAbbrev').get('default') == teamAbbrev, teams))[0]
+    # Players Statistics
+    if info == 'stats':
+        txt += get_team_stats_players(teamAbbrev)
 
-    # Rank
-    txt += "\n<b>Rank:</b>\n"
-    n = 10
-    txt += "<code>"
-    txt += "Division".ljust(n) + f" | #{team.get('divisionSequence')}\n"
-    txt += "Conference".ljust(n) + f" | #{team.get('conferenceSequence')}\n"
-    txt += "League".ljust(n) + f" | #{team.get('leagueSequence')}\n"
-    txt += "WildCard".ljust(n) + f" | {'#' + str(team.get('wildcardSequence')) if team.get('wildcardSequence') else ''}\n"
-    txt += "</code>"
+    # Team Schedule
+    elif info == 'schedule':
+        txt += get_team_schedule(teamAbbrev)
 
-    # Stats
-    # PP
-    pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct').get('data')
-    t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pp_data, 1)))[0]
-    pp = round(t[1].get('powerPlayPct') * 100, 1)
-    pp_rank = t[0]
-    # PK
-    pk_data = sorted(pp_data, key=lambda t: t.get('penaltyKillPct'), reverse=True)
-    t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pk_data, 1)))[0]
-    pk = round(t[1].get('penaltyKillPct') * 100, 1)
-    pk_rank = t[0]
+    # Team Info/Stats
+    else:
+        teams = get_standings_data()
+        team = list(filter(lambda t: t.get('teamAbbrev').get('default') == teamAbbrev, teams))[0]
 
-    txt += "\n<b>Team Stats:</b>\n"
-    n = 12
-    txt += "<code>"
-    txt += "Points".ljust(n) + f" | {team.get('points')}\n"
-    txt += "Games Played".ljust(n) + f" | {team.get('gamesPlayed')}\n"
-    txt += "W-L-OT".ljust(n) + f" | {team.get('wins')}-{team.get('losses')}-{team.get('otLosses')}\n"
-    txt += "home".rjust(n) + f" | {team.get('homeWins')}-{team.get('homeLosses')}-{team.get('homeOtLosses')}\n"
-    txt += "away".rjust(n) + f" | {team.get('roadWins')}-{team.get('roadLosses')}-{team.get('roadOtLosses')}\n"
-    txt += "last10".rjust(n) + f" | {team.get('l10Wins')}-{team.get('l10Losses')}-{team.get('l10OtLosses')}\n"
-    txt += "Streak".ljust(n) + f" | {team.get('streakCode') + str(team.get('streakCount'))}\n"
-    txt += "GoalsFor".ljust(n) + f" | {team.get('goalFor')}\n"
-    txt += "GoalsAgainst".ljust(n) + f" | {team.get('goalAgainst')}\n"
-    txt += "PP%".ljust(n) + f" | {pp} (#{pp_rank})\n"
-    txt += "PK%".ljust(n) + f" | {pk} (#{pk_rank})\n"
-    txt += "</code>\n"
+        # Rank
+        txt += "\n<b>Rank:</b>\n"
+        n = 10
+        txt += "<code>"
+        txt += "Division".ljust(n) + f" | #{team.get('divisionSequence')}\n"
+        txt += "Conference".ljust(n) + f" | #{team.get('conferenceSequence')}\n"
+        txt += "League".ljust(n) + f" | #{team.get('leagueSequence')}\n"
+        txt += "WildCard".ljust(n) + f" | {'#' + str(team.get('wildcardSequence')) if team.get('wildcardSequence') else ''}\n"
+        txt += "</code>"
 
-    txt += get_team_stats_players(teamAbbrev_teamName)
+        # Stats
+        # PP
+        pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct').get('data')
+        t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pp_data, 1)))[0]
+        pp = stats.decimal_value_to_str(t[1].get('powerPlayPct') * 100, decimal=1)
+        pp_rank = t[0]
+        # PK
+        pk_data = sorted(pp_data, key=lambda t: t.get('penaltyKillPct'), reverse=True)
+        t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pk_data, 1)))[0]
+        pk = stats.decimal_value_to_str(t[1].get('penaltyKillPct') * 100, decimal=1)
+        pk_rank = t[0]
+
+        txt += "\n<b>Team Stats:</b>\n"
+        n = 12
+        txt += "<code>"
+        txt += "Points".ljust(n) + f" | {team.get('points')}\n"
+        txt += "Games Played".ljust(n) + f" | {team.get('gamesPlayed')}\n"
+        txt += "W-L-OT".ljust(n) + f" | {team.get('wins')}-{team.get('losses')}-{team.get('otLosses')}\n"
+        txt += "home".rjust(n) + f" | {team.get('homeWins')}-{team.get('homeLosses')}-{team.get('homeOtLosses')}\n"
+        txt += "away".rjust(n) + f" | {team.get('roadWins')}-{team.get('roadLosses')}-{team.get('roadOtLosses')}\n"
+        txt += "last10".rjust(n) + f" | {team.get('l10Wins')}-{team.get('l10Losses')}-{team.get('l10OtLosses')}\n"
+        txt += "Streak".ljust(n) + f" | {team.get('streakCode') + str(team.get('streakCount'))}\n"
+        txt += "GoalsFor".ljust(n) + f" | {team.get('goalFor')}\n"
+        txt += "GoalsAgainst".ljust(n) + f" | {team.get('goalAgainst')}\n"
+        txt += "PP%".ljust(n) + f" | {pp}% (#{pp_rank})\n"
+        txt += "PK%".ljust(n) + f" | {pk}% (#{pk_rank})\n"
+        txt += "</code>\n"
 
     return txt
 
@@ -193,17 +201,15 @@ def get_team_stats_players_data(teamAbbrev):
     return data
 
 
-def get_team_stats_players(teamAbbrev_teamName):
-    teamAbbrev, teamName = teamAbbrev_teamName.split(':')
+def get_team_stats_players(teamAbbrev):
 
     width_player_name = 17  # Ширина поля имени игрока
-
-    txt = f"<b>{teamName}</b>\n"
 
     data = get_team_stats_players_data(teamAbbrev)
     skaters = sorted(data.get('skaters'), key=lambda s: s.get('points'), reverse=True)
     goalies = sorted(data.get('goalies'), key=lambda s: s.get('gamesPlayed'), reverse=True)
 
+    txt = "\n<b>Statistics:</b>\n"
     txt += "<pre>"
 
     # Skaters
@@ -262,6 +268,30 @@ def get_team_stats_players(teamAbbrev_teamName):
     txt += "</pre>"
 
     return txt
+
+
+def get_team_schedule(teamAbbrev):
+
+    width_player_name = 17  # Ширина поля имени игрока
+
+    data = get_team_schedule_data(teamAbbrev)
+    games = data.get('games')
+
+    txt = f"\n<b>Schedule: ({data.get('currentMonth')})</b>\n"
+    #txt += "<pre>"
+
+    for g in games:
+        txt += f"{g.get('gameDate')} - {schedule.get_schedule_game_text(g)}\n"
+
+    return txt
+
+
+def get_team_schedule_data(teamAbbrev):
+    stats_str = f"club-schedule/{teamAbbrev}/month/now"
+
+    data = get_request_nhl_api(stats_str)
+
+    return data
 
 
 # Получение от сервера данных турнирной таблицы
