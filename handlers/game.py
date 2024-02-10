@@ -1,4 +1,4 @@
-from aiogram import types, Dispatcher
+from aiogram import types, Dispatcher, exceptions
 from aiogram.dispatcher.filters import Text
 
 from nhl import nhl
@@ -7,25 +7,24 @@ from nhl import keyboards
 
 
 async def command_game_details(callback : types.CallbackQuery):
-    callback_data_parts = callback.data.split('_')
-    game_id = callback_data_parts[2]
+    game_id, details = callback.data.split('_')[2:]
 
-    if (len(callback_data_parts) < 4):
+    if details == 'button':
+        func = callback.message.answer
         details = 'scoring'
-        await callback.message.answer(
-            f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
-            reply_markup=keyboards.keyboard_game_details(game_id))
-        await callback.answer()
-
     else:
-        details = callback_data_parts[3]
-        try:
-            await callback.message.edit_text(
-                f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}", parse_mode="HTML",
-                reply_markup=keyboards.keyboard_game_details(game_id))
-            await callback.answer(f"Game: {game_id} updated!")
-        except:
-            await callback.answer()
+        func = callback.message.edit_text
+
+    txt = f"{nhl.ico['hockey']} <b>Game:</b>\n{game.get_game_text(game_id, details)}"
+
+    try:
+        await func(txt, parse_mode="HTML", reply_markup=keyboards.keyboard_game_details(game_id))
+
+    except exceptions.MessageNotModified:
+        pass
+
+    finally:
+        await callback.answer()
 
 
 def register_handlers_game(dp: Dispatcher):

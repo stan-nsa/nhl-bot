@@ -217,9 +217,7 @@ def get_team_stats_players(teamAbbrev):
     player_number = 0
     for player in skaters:
         player_number += 1
-        player_name = short_player_name(firstName=player.get('firstName').get('default'), lastName=player.get('lastName').get('default'))
-        player_name = player_name if (len(player_name) <= width_player_name) else \
-                      f"{player_name[:width_player_name - 3]}..."
+        player_name = short_player_name(firstName=player.get('firstName').get('default'), lastName=player.get('lastName').get('default'), max_width=width_player_name)
 
         txt += f"{str(player_number).rjust(2)}|" \
                f"{player_name.ljust(width_player_name)}|"
@@ -246,9 +244,7 @@ def get_team_stats_players(teamAbbrev):
     player_number = 0
     for player in goalies:
         player_number += 1
-        player_name = short_player_name(firstName=player.get('firstName').get('default'), lastName=player.get('lastName').get('default'))
-        player_name = player_name if (len(player_name) <= width_player_name) else \
-                      f"{player_name[:width_player_name - 3]}..."
+        player_name = short_player_name(firstName=player.get('firstName').get('default'), lastName=player.get('lastName').get('default'), max_width=width_player_name)
 
         txt += f"{player_number}|" \
                f"{player_name.ljust(width_player_name)}|"
@@ -438,7 +434,7 @@ def get_standings_table_row_text(row, rank, full=False):
 
 
 # Краткое ФИО (И.Фамилия)
-def short_player_name(fullName=None, firstName=None, lastName=None):
+def short_player_name(fullName=None, firstName=None, lastName=None, max_width=None):
     if fullName:
         name_parts = fullName.split()
         name = ''.join([i[:1]+'.' for i in [*name_parts[:-1]]]) + name_parts[-1]
@@ -446,5 +442,7 @@ def short_player_name(fullName=None, firstName=None, lastName=None):
         name_parts = firstName.split()
         name = ''.join([i[:1]+'.' for i in name_parts]) + lastName
 
-    return name
+    if max_width:
+        name = name if (len(name) <= max_width) else f"{name[:max_width - 3]}..."
 
+    return name

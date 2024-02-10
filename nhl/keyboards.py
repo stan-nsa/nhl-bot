@@ -1,4 +1,3 @@
-from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from nhl.nhl import ico
 
@@ -24,7 +23,8 @@ def keyboard_schedule_details(games):
     kb = InlineKeyboardMarkup()
 
     for game in games:
-        kb.add(InlineKeyboardButton(game['text'], callback_data=f"Game_Details_{game['id']}"))
+        kb.add(InlineKeyboardButton(game['text'], callback_data=f"Game_Details_{game['id']}_button"))
+        #kb.add(InlineKeyboardButton(game['text'], callback_data=f"Game_Details_{game['id']}"))
 
     return kb
 
@@ -65,26 +65,10 @@ def keyboard_stats_goalies(gameType='regular'):
     return kb
 
 
-def keyboard_stats_skaters(gameType='regular'):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_skaters_points_{gameType}"),
-                                    InlineKeyboardButton("Goals", callback_data=f"stats_skaters_goals_{gameType}"),
-                                    InlineKeyboardButton("Assists", callback_data=f"stats_skaters_assists_{gameType}"))
-
-    return kb
-
-
-def keyboard_stats_defensemen(gameType='regular'):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_defensemen_points_{gameType}"),
-                                    InlineKeyboardButton("Goals", callback_data=f"stats_defensemen_goals_{gameType}"),
-                                    InlineKeyboardButton("Assists", callback_data=f"stats_defensemen_assists_{gameType}"))
-
-    return kb
-
-
-def keyboard_stats_rookies(gameType='regular'):
-    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_rookies_points_{gameType}"),
-                                    InlineKeyboardButton("Goals", callback_data=f"stats_rookies_goals_{gameType}"),
-                                    InlineKeyboardButton("Assists", callback_data=f"stats_rookies_assists_{gameType}"))
+def keyboard_stats_skaters(gameType='regular', playersType='skaters'):
+    kb = InlineKeyboardMarkup().row(InlineKeyboardButton("Points", callback_data=f"stats_{playersType}_points_{gameType}"),
+                                    InlineKeyboardButton("Goals", callback_data=f"stats_{playersType}_goals_{gameType}"),
+                                    InlineKeyboardButton("Assists", callback_data=f"stats_{playersType}_assists_{gameType}"))
 
     return kb
 

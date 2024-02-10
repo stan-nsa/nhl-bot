@@ -107,7 +107,6 @@ def get_schedule_game_text(game, hideScore=False, inlinemenu=False):
 
     # Live
     elif game['gameState'] in nhl.gameState['live']:
-        #currentPeriod = game['periodDescriptor']['periodType'] if game['period'] > 3 else nhl.gamePeriods[game['periodDescriptor']['number']]
         currentPeriod = game['periodDescriptor']['periodType'] if game['periodDescriptor']['number'] > 3 else nhl.gamePeriods[game['periodDescriptor']['number']]
         txt = f"{get_game_teams_score_text(game, hideScore=hideScore, inlinemenu=inlinemenu)} - " \
               f"{nhl.ico['live']} {currentPeriod}/" \
@@ -118,7 +117,6 @@ def get_schedule_game_text(game, hideScore=False, inlinemenu=False):
         teams_score_text = get_game_teams_score_text(game, hideScore=hideScore, inlinemenu=inlinemenu)
         txt = f"{teams_score_text} - " \
                f"{nhl.ico['finished']} {'' if game['periodDescriptor']['number'] == 3 else game['periodDescriptor']['periodType']}"
-                # f"{nhl.ico['finished']} {'' if game['period'] == 3 else game['periodDescriptor']['periodType']}"
 
     # TBD/Postponed
     elif game['gameState'] in nhl.gameState['tbd']:  # 8 - Scheduled (Time TBD); 9 - Postponed

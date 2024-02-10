@@ -1,6 +1,4 @@
-import json
-
-from aiogram import types, Dispatcher
+from aiogram import types, Dispatcher, exceptions
 from nhl import nhl
 from nhl import keyboards
 
@@ -8,57 +6,51 @@ from aiogram.dispatcher.filters import Text
 
 
 async def command_standings(message: types.Message):
-    await message.answer(
-        f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(full=True)}",
-        parse_mode="HTML",
-        reply_markup=keyboards.keyboard_standings())
+    txt = f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(full=True)}"
+    await message.answer(txt, parse_mode="HTML", reply_markup=keyboards.keyboard_standings())
 
 
 async def command_standings_type(callback: types.CallbackQuery):
     standings_type = callback.data.split('_')[1]
-    try:
-        #await callback.message.answer(
-        await callback.message.edit_text(
-            f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(standings_type, full=True)}",
-            parse_mode="HTML",
-            reply_markup=keyboards.keyboard_standings())
-        await callback.answer()
 
-    except:
+    txt = f"{nhl.ico['standings']}<b>Standings:</b>\n{nhl.get_standings_text(standings_type, full=True)}"
+
+    try:
+        await callback.message.edit_text(txt, parse_mode="HTML", reply_markup=keyboards.keyboard_standings())
+
+    except exceptions.MessageNotModified:
+        pass
+
+    finally:
         await callback.answer()
 
 
 async def command_teams(message: types.Message):
     teams = nhl.get_teams()
-    await message.answer(
-        f"{nhl.ico['hockey']}<b>Teams:</b>",
-        parse_mode="HTML",
-        reply_markup=keyboards.keyboard_teams(teams))
+    txt = f"{nhl.ico['hockey']}<b>Teams:</b>"
+    await message.answer(txt, parse_mode="HTML", reply_markup=keyboards.keyboard_teams(teams))
 
 
 async def command_team_info(callback: types.CallbackQuery):
     teamAbbrev_teamName, info = callback.data.split('_')[1:]
 
+    # Функция для ответа
     if info == 'button':
-        try:
-            await callback.message.answer(
-                f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName, info='info')}",
-                parse_mode="HTML",
-                reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
-            await callback.answer()
-
-        except:
-            await callback.answer()
+        func = callback.message.answer
+        info = 'info'
     else:
-        try:
-            await callback.message.edit_text(
-                f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName, info=info)}",
-                parse_mode="HTML",
-                reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
-            await callback.answer()
+        func = callback.message.edit_text
 
-        except:
-            await callback.answer()
+    txt = f"{nhl.ico['hockey']}<b>Team:</b>\n{nhl.get_team_info(teamAbbrev_teamName, info=info)}"
+
+    try:
+        await func(txt, parse_mode="HTML", reply_markup=keyboards.keyboard_team(teamAbbrev_teamName))
+
+    except exceptions.MessageNotModified:
+        pass
+
+    finally:
+        await callback.answer()
 
 
 def register_handlers_nhl(dp: Dispatcher):

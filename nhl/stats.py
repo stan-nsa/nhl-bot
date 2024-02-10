@@ -51,6 +51,13 @@ game_stats = {
     'blockedShots': 'BLKS'
 }
 
+players_type = {
+    'skaters': {'caption': 'Skaters', 'exp': ''},
+    'goalies': {'caption': 'Goalies', 'exp': ''},
+    'defensemen': {'caption': 'Defensemen', 'exp': ' and positionCode="D"'},
+    'rookies': {'caption': 'Rookies', 'exp': ' and isRookie=1'},
+}
+
 
 # Запрос к серверу для получения данных
 def get_request_nhl_stats_api(query_str: str):
@@ -97,42 +104,34 @@ def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10,
 
 
 # Формирование теста для вывода вратарской статистики
-def get_stats_goalies_text_fromData(data, full=False):
+def get_stats_goalies_text_fromData(data):
+    name_field_width = 21
+
     txt = "<pre>"
 
-    txt += f"\n #|{'Goalie'.center(21, '_')}|{goalie_stats.get(data.get('stata')).get('desc')}\n"
+    txt += f"\n #|{'Goalies'.center(name_field_width, '_')}|{goalie_stats.get(data.get('stata')).get('desc')}\n"
 
     n = 0
     for player in data.get('data'):
         n += 1
         value = decimal_value_to_str(player.get(data.get('stata')), decimal=goalie_stats.get(data.get('stata')).get('decimal'))
-        txt += f"{str(n).rjust(2)}|{player.get('goalieFullName').ljust(21)}|{value}\n"
+        txt += f"{str(n).rjust(2)}|{player.get('goalieFullName').ljust(name_field_width)}|{value}\n"
 
     return txt + "</pre>"
 
 
 # Формирование теста для вывода вратарской статистики по указанному стат.показателю
-def get_stats_goalies_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+def get_stats_goalies_byProperty_text(property: str, direction='DESC', limit=10, gameType='regular'):
     data = get_stats_goalies_data_byProperty(property, direction, limit, gameType=gameType)
 
-    text = get_stats_goalies_text_fromData(data, full)
+    text = get_stats_goalies_text_fromData(data)
 
     return text
 
 
-# Формирование теста для вывода вратарских статистик
-# def get_stats_goalies_text(full=False):
-#     text = get_stats_goalies_byProperty_text(property='goalsAgainstAverage', direction='ASC', full=full)
-#     text += get_stats_goalies_byProperty_text('savePct', full=full)
-#     text += get_stats_goalies_byProperty_text('shutouts', full=full)
-#     #text += get_stats_goalies_byProperty_text('wins', full=full)
-#
-#     return text
-
-
 #-- Статистика полевых ----------------------------------------------------------------------------
 # Получение данных статистики полевых по указанному стат.показателю
-def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular'):
+def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular', playersType='skaters'):
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
@@ -142,54 +141,39 @@ def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10,
     query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
+    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}{players_type.get(playersType).get("exp")}'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
     data = get_request_nhl_stats_api(query_str)
 
     data['stata'] = property
+    data['caption'] = players_type.get(playersType).get("caption")
 
     return data
 
 
 # Формирование теста для вывода статистики полевых
-def get_stats_skaters_text_fromData(data, full=False):
-    #full = True
+def get_stats_skaters_text_fromData(data):
+    name_field_width = 21
+
     txt = "<pre>"
 
-    if (full):
-        txt += f"\n #|{'Skaters'.center(21, '_')}|{skater_stats[data['stata']]}\n"
-    else:
-        txt += f"\n #|{'Skaters'.center(21, '_')}|{skater_stats[data['stata']]}\n"
+    txt += f"\n #|{data.get('caption').center(name_field_width, '_')}|{skater_stats.get(data.get('stata'))}\n"
 
     n = 0
-    for player in data['data']:
+    for player in data.get('data'):
         n += 1
-        if (full):
-            #txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
-        else:
-            # txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
+        txt += f"{str(n).rjust(2, ' ')}|{player.get('skaterFullName').ljust(name_field_width, ' ')}|{player.get(data.get('stata'))}\n"
 
     return txt + "</pre>"
 
 
 # Формирование теста для вывода статистики полевых по указанному стат.показателю
-def get_stats_skaters_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
-    data = get_stats_skaters_data_byProperty(property, direction, limit, gameType=gameType)
+def get_stats_skaters_byProperty_text(property: str, direction='DESC', limit=10, gameType='regular', playersType='skaters'):
+    data = get_stats_skaters_data_byProperty(property, direction, limit, gameType=gameType, playersType=playersType)
 
-    text = get_stats_skaters_text_fromData(data, full)
-
-    return text
-
-
-# Формирование теста для вывода статистик полевых
-def get_stats_skaters_text(full=False):
-    text = get_stats_skaters_byProperty_text(property='points', full=full)
-    text += get_stats_skaters_byProperty_text('goals', full=full)
-    text += get_stats_skaters_byProperty_text('assists', full=full)
+    text = get_stats_skaters_text_fromData(data)
 
     return text
 
@@ -206,7 +190,7 @@ def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=
     query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=positionCode="D" and gameTypeId={gameTypeId} and seasonId={seasonId}'
+    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId} and positionCode="D"'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
@@ -218,42 +202,35 @@ def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=
 
 
 # Формирование теста для вывода статистики защитников
-def get_stats_defensemen_text_fromData(data, full=False):
-    #full = True
+def get_stats_defensemen_text_fromData(data):
+    name_field_width = 21
+
     txt = "<pre>"
 
-    if (full):
-        txt += f"\n #|{'Defensemen'.center(21, '_')}|{skater_stats[data['stata']]}\n"
-    else:
-        txt += f"\n #|{'Defensemen'.center(21, '_')}|{skater_stats[data['stata']]}\n"
+    txt += f"\n #|{'Defensemen'.center(name_field_width, '_')}|{skater_stats[data['stata']]}\n"
 
     n = 0
     for player in data['data']:
         n += 1
-        if (full):
-            #txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
-        else:
-            # txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
+        txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(name_field_width, ' ')}|{player[data['stata']]}\n"
 
     return txt + "</pre>"
 
 
 # Формирование теста для вывода статистики защитников по указанному стат.показателю
-def get_stats_defensemen_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+def get_stats_defensemen_byProperty_text(property: str, direction='DESC', limit=10, gameType='regular'):
     data = get_stats_defensemen_data_byProperty(property, direction, limit, gameType=gameType)
 
-    text = get_stats_defensemen_text_fromData(data, full)
+    text = get_stats_defensemen_text_fromData(data)
 
     return text
 
 
 # Формирование теста для вывода статистик защитников
-def get_stats_defensemen_text(full=False):
-    text = get_stats_defensemen_byProperty_text(property='points', full=full)
-    text += get_stats_defensemen_byProperty_text('goals', full=full)
-    text += get_stats_defensemen_byProperty_text('assists', full=full)
+def get_stats_defensemen_text():
+    text = get_stats_defensemen_byProperty_text(property='points')
+    text += get_stats_defensemen_byProperty_text('goals')
+    text += get_stats_defensemen_byProperty_text('assists')
 
     return text
 
@@ -270,7 +247,7 @@ def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10,
     query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=isRookie=1 and gameTypeId={gameTypeId} and seasonId={seasonId}'
+    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId} and isRookie=1'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
@@ -282,42 +259,35 @@ def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10,
 
 
 # Формирование теста для вывода статистики новичков
-def get_stats_rookies_text_fromData(data, full=False):
-    #full = True
+def get_stats_rookies_text_fromData(data):
+    name_field_width = 21
+
     txt = "<pre>"
 
-    if (full):
-        txt += f"\n #|{'Rookies'.center(21, '_')}|{skater_stats[data['stata']]}\n"
-    else:
-        txt += f"\n #|{'Rookies'.center(21, '_')}|{skater_stats[data['stata']]}\n"
+    txt += f"\n #|{'Rookies'.center(name_field_width, '_')}|{skater_stats[data['stata']]}\n"
 
     n = 0
     for player in data['data']:
         n += 1
-        if (full):
-            #txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
-        else:
-            # txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(20, ' ')}({player['teamAbbrevs']})|{round(player[data['stata']], 3)}\n"
-            txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(21, ' ')}|{round(player[data['stata']], 3)}\n"
+        txt += f"{str(n).rjust(2, ' ')}|{player['skaterFullName'].ljust(name_field_width, ' ')}|{player[data['stata']]}\n"
 
     return txt + "</pre>"
 
 
 # Формирование теста для вывода статистики новичков по указанному стат.показателю
-def get_stats_rookies_byProperty_text(property: str, direction='DESC', limit=10, full=False, gameType='regular'):
+def get_stats_rookies_byProperty_text(property: str, direction='DESC', limit=10, gameType='regular'):
     data = get_stats_rookies_data_byProperty(property, direction, limit, gameType=gameType)
 
-    text = get_stats_rookies_text_fromData(data, full)
+    text = get_stats_rookies_text_fromData(data)
 
     return text
 
 
 # Формирование теста для вывода статистик новичков
-def get_stats_rookies_text(full=False):
-    text = get_stats_rookies_byProperty_text(property='points', full=full)
-    text += get_stats_rookies_byProperty_text('goals', full=full)
-    text += get_stats_rookies_byProperty_text('assists', full=full)
+def get_stats_rookies_text():
+    text = get_stats_rookies_byProperty_text(property='points')
+    text += get_stats_rookies_byProperty_text('goals')
+    text += get_stats_rookies_byProperty_text('assists')
 
     return text
 
@@ -345,30 +315,25 @@ def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='r
 
 
 # Формирование теста для вывода статистики команд
-def get_stats_teams_text_fromData(data, full=False):
-    #full = True
+def get_stats_teams_text_fromData(data):
+    name_field_width = 21
     txt = "<pre>"
 
-    if (full):
-        txt += f"\n #|{'Team'.center(22, '_')}|{team_stats[data['stata']]}\n"
-    else:
-        txt += f"\n #|{'Team'.center(22, '_')}|{team_stats[data['stata']]}\n"
+    txt += f"\n #|{'Team'.center(name_field_width, '_')}|{team_stats[data['stata']]}\n"
 
     n = 0
     for team in data['data']:
         n += 1
-        if (full):
-            txt += f"{str(n).rjust(2, ' ')}|{team['teamFullName'].ljust(22, ' ')}|{round(team[data['stata']]*100, 1) if (team[data['stata']] < 1) else team[data['stata']]}\n"
-        else:
-            txt += f"{str(n).rjust(2, ' ')}|{team['teamFullName'].ljust(22, ' ')}|{round(team[data['stata']]*100, 1) if (team[data['stata']] < 1) else team[data['stata']]}\n"
+        value = decimal_value_to_str(team[data['stata']]*100, decimal=1) if (team[data['stata']] < 1) else team[data['stata']]
+        txt += f"{str(n).rjust(2, ' ')}|{team['teamFullName'].ljust(name_field_width, ' ')}|{value}\n"
 
     return txt + "</pre>"
 
 
 # Формирование теста для вывода статистики команд по указанному стат.показателю
-def get_stats_teams_byProperty_text(property: str, direction='DESC', full=False, gameType='regular'):
+def get_stats_teams_byProperty_text(property: str, direction='DESC',gameType='regular'):
     data = get_stats_teams_data_byProperty(property, direction, gameType=gameType)
 
-    text = get_stats_teams_text_fromData(data, full)
+    text = get_stats_teams_text_fromData(data)
 
     return text
