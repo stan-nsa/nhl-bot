@@ -11,7 +11,8 @@ async def command_start(message: types.Message):
                         "/schedule - Расписание матчей\n"
                         "/standings - Турнирная таблица\n"
                         "/stats - Статистика игроков\n"
-                        "/stats_teams - Статистика команд\n", \
+                        "/stats_teams - Статистика команд\n"
+                        "/teams - Информация по командам\n", \
                         parse_mode="HTML")
 
 
