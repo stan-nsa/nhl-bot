@@ -1,3 +1,11 @@
+# Для шедулера:
+# Как написать телеграм-бот с рассылкой на Python. Исходный код прилагается:
+# https://dzen.ru/a/YJVeVbjzSwTStbdK
+# Как сделать рассылку на основе часового пояса в телеграм-боте на Python. Исходный код прилагается:
+# https://dzen.ru/a/YJgsBYe_KXf8olZQ
+
+
+
 from aiogram import types, Dispatcher
 from create_bot import dp, bot
 from db import db
