@@ -76,7 +76,7 @@ def get_game_text(game_id, details='scoring'):
 
     # Live
     elif boxscore.get('gameState') in nhl.gameState.get('live'):
-        currentPeriod = boxscore.get('periodDescriptor').get('periodType') if boxscore.get('period') > 3 else nhl.gamePeriods[boxscore.get('periodDescriptor').get('number')]
+        currentPeriod = boxscore.get('periodDescriptor').get('periodType') if boxscore.get('periodDescriptor').get('number') > 3 else nhl.gamePeriods[boxscore.get('periodDescriptor').get('number')]
         txt_game_status = f"{nhl.ico.get('live')} <b>Live: {currentPeriod} / {'END' if (boxscore.get('clock').get('inIntermission')) else boxscore.get('clock').get('timeRemaining')}</b>"
         txt_team_away_score = schedule.get_game_team_score_text(boxscore.get('awayTeam').get('score'))
         txt_team_home_score = schedule.get_game_team_score_text(boxscore.get('homeTeam').get('score'))
@@ -85,7 +85,7 @@ def get_game_text(game_id, details='scoring'):
 
     # Final
     elif boxscore.get('gameState') in nhl.gameState.get('final'):
-        txt_game_status = f"{nhl.ico.get('finished')} <b>Finished:</b> {'' if boxscore.get('period') == 3 else boxscore.get('periodDescriptor').get('periodType')}"
+        txt_game_status = f"{nhl.ico.get('finished')} <b>Finished:</b> {'' if boxscore.get('periodDescriptor').get('number') == 3 else boxscore.get('periodDescriptor').get('periodType')}"
         txt_team_away_score = schedule.get_game_team_score_text(boxscore.get('awayTeam').get('score'))
         txt_team_home_score = schedule.get_game_team_score_text(boxscore.get('homeTeam').get('score'))
         txt_game_summary = game_summary_text(landing)
@@ -122,7 +122,7 @@ def game_details_text(data, type_details: str):
             txt += f"{nhl.ico.get('scores')}{nhl.ico.get('goal')} <b>Scoring:</b>\n"
 
             for period in scoring:
-                period_txt = f"{period.get('periodDescriptor').get('periodType') if (period.get('periodDescriptor').get('number') > 3) else nhl.gamePeriods.get(period.get('period'))}"
+                period_txt = f"{period.get('periodDescriptor').get('periodType') if (period.get('periodDescriptor').get('number') > 3) else nhl.gamePeriods.get(period.get('periodDescriptor').get('number'))}"
                 txt += f"\n<b>{period_txt}{' period' if (period.get('periodDescriptor').get('number') < 4) else ''}:</b>"
 
                 for goal in period.get('goals'):
@@ -147,7 +147,7 @@ def game_details_text(data, type_details: str):
             txt += f"{nhl.ico.get('penalty')} <b>Penalties:</b>\n"
 
             for period in penalties:
-                period_txt = f"{period.get('periodDescriptor').get('periodType') if (period.get('periodDescriptor').get('number') > 3) else nhl.gamePeriods[period.get('period')]}"
+                period_txt = f"{period.get('periodDescriptor').get('periodType') if (period.get('periodDescriptor').get('number') > 3) else nhl.gamePeriods[period.get('periodDescriptor').get('number')]}"
                 txt += f"\n<b>{period_txt}{' period' if (period.get('periodDescriptor').get('number') < 4) else ''}:</b>"
 
                 for penalty in period.get('penalties'):
