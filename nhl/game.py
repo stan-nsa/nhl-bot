@@ -164,7 +164,8 @@ def game_details_text(data, type_details: str):
             txt += game_teams_stats_text(data.get('boxscore'))
 
         case 'gameReports':  # Отчеты
-            reports = data.get('boxscore').get('boxscore').get('gameReports')
+            #reports = data.get('boxscore').get('boxscore').get('gameReports')
+            reports = data.get('boxscore').get('summary').get('gameReports')
             txt += f"{nhl.ico.get('report')} <b>Game Reports:</b>\n\n" \
                    f"{nhl.ico.get('point')} <a href='" + reports.get('gameSummary') + "'>Game Summary</a>\n\n" \
                    f"{nhl.ico.get('point')} <a href='" + reports.get('eventSummary') + "'>Event Summary</a>\n\n" \
@@ -202,7 +203,8 @@ def game_summary_text(data):
 
 # Формирование теста для вывода статистики игроков
 def game_teams_stats_text(data):
-    players_stats = data.get('boxscore').get('playerByGameStats')
+    #players_stats = data.get('boxscore').get('playerByGameStats')
+    players_stats = data.get('playerByGameStats')
 
     width_player_name = 17 # Ширина поля имени игрока
 
