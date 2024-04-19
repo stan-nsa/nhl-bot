@@ -53,21 +53,21 @@ def get_game_text(game_id, details='scoring'):
 
     # -- Информация о текущей серии ПО (Game #, Team lead) --
     series_summary = ""
-    if boxscore.get('gameType') == nhl.gameType.get('playoff').get('id'):
-        query_str = f"club-schedule/{boxscore.get('awayTeam').get('abbrev')}/week/{boxscore.get('gameDate')}"
-        data_series = nhl.get_request_nhl_api(query_str)
-        series_status = data_series.get('games')[0].get('seriesStatus')
-
-        if series_status.get('awayTeamWins') == series_status.get('homeTeamWins'):
-            series_score = "Tied"
-        elif series_status.get('awayTeamWins') > series_status.get('homeTeamWins'):
-            series_score = f"{boxscore.get('awayTeam').get('abbrev')}"
-        else:
-            series_score = f"{boxscore.get('homeTeam').get('abbrev')}"
-
-        series_score += f" {series_status.get('awayTeamWins')}-{series_status.get('homeTeamWins')}"
-
-        series_summary = f"({series_status.get('roundAbbrev')} G{series_status.get('gameNumberOfSeries')} | {series_score})"
+    # if boxscore.get('gameType') == nhl.gameType.get('playoff').get('id'):
+    #     query_str = f"club-schedule/{boxscore.get('awayTeam').get('abbrev')}/week/{boxscore.get('gameDate')}"
+    #     data_series = nhl.get_request_nhl_api(query_str)
+    #     series_status = data_series.get('games')[0].get('seriesStatus')
+    #
+    #     if series_status.get('awayTeamWins') == series_status.get('homeTeamWins'):
+    #         series_score = "Tied"
+    #     elif series_status.get('awayTeamWins') > series_status.get('homeTeamWins'):
+    #         series_score = f"{boxscore.get('awayTeam').get('abbrev')}"
+    #     else:
+    #         series_score = f"{boxscore.get('homeTeam').get('abbrev')}"
+    #
+    #     series_score += f" {series_status.get('awayTeamWins')}-{series_status.get('homeTeamWins')}"
+    #
+    #     series_summary = f"({series_status.get('roundAbbrev')} G{series_status.get('gameNumberOfSeries')} | {series_score})"
     # --------------------------------------------------------
 
     # Scheduled
