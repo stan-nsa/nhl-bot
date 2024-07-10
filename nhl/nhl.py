@@ -5,7 +5,7 @@
 #stats - Статистика игроков
 #stats_teams - Статистика команд
 #teams - Информация по командам
-
+import calendar
 
 # NHL API Documentation:
 # https://github.com/Zmalski/NHL-API-Reference
@@ -26,6 +26,7 @@ import requests
 from emoji import emojize #Overview of all emoji: https://carpedm20.github.io/emoji/   https://k3a.me/telegram-emoji-list-codes-descriptions/
 import pytz
 from nhl import stats, schedule
+from create_bot import proxies
 
 # from datetime import datetime, timezone, date, timedelta
 # import db
@@ -33,12 +34,6 @@ from nhl import stats, schedule
 #OLD NHL_API_URL = "https://statsapi.web.nhl.com/api/v1"
 NHL_API_URL = "https://api-web.nhle.com/v1/"
 
-proxies = {
-    'http': 'socks5://puser:8888@rkn-pnh.hopto.org:8888',
-    'https': 'socks5://puser:8888@rkn-pnh.hopto.org:8888'
-}
-
-proxies = None
 
 # Иконки/значки для статусов и визуализации информации
 ico = {
@@ -110,22 +105,32 @@ hide_score = True # Скрывать счёт в командах scores, schedu
 
 
 # Запрос к серверу для получения данных
-def get_request_nhl_api(query_str):
-    response = requests.get(NHL_API_URL + query_str, params={"Content-Type": "application/json"})#, proxies=proxies)
+def get_request_nhl_api(query_str: str) -> dict:
+    url = NHL_API_URL + query_str
+    print(url)  # For debug
+    response = requests.get(url, params={"Content-Type": "application/json"}, proxies=proxies)
     return response.json()
 
 
 # Получение от сервера данных о текущем сезоне
-def get_season_current():
+def get_season_current() -> dict:
     query_str = 'season?sort=[{"property":"id","direction":"DESC"}]&limit=1'
 
     data = stats.get_request_nhl_stats_api(query_str)
 
-    return data.get('data')[0]
+    season_id = data.get('data')[0]
+
+    return season_id
+
+
+def season_name_from_id(season_id) -> str:
+    season_id = str(season_id)
+    season_name_str = f"{season_id[:4]}-{season_id[4:]}"
+    return season_name_str
 
 
 # Получение от сервера данных о командах
-def get_teams():
+def get_teams() -> list:
 
     data = get_standings_data()
     teams = sorted(data, key=lambda t: t.get('teamName').get('default'))
@@ -134,10 +139,10 @@ def get_teams():
 
 
 # Формирование текста информации о команде
-def get_team_info(teamAbbrev_teamName, info):
+def get_team_info(teamAbbrev_teamName, info) -> str:
     teamAbbrev, teamName = teamAbbrev_teamName.split(':')
 
-    txt = f"<b>{teamName}</b>\n"
+    txt = f"\n<b>{teamName}</b>\n"
 
     # Players Statistics
     if info == 'stats':
@@ -152,6 +157,8 @@ def get_team_info(teamAbbrev_teamName, info):
         teams = get_standings_data()
         team = list(filter(lambda t: t.get('teamAbbrev').get('default') == teamAbbrev, teams))[0]
 
+        txt += f"\n<b>Season: {season_name_from_id(team.get('seasonId'))}</b>\n"
+
         # Rank
         txt += "\n<b>Rank:</b>\n"
         n = 10
@@ -163,16 +170,21 @@ def get_team_info(teamAbbrev_teamName, info):
         txt += "</code>"
 
         # Stats
+        pp_str = ""
+        pk_str = ""
         # PP
-        pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct').get('data')
-        t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pp_data, 1)))[0]
-        pp = stats.decimal_value_to_str(t[1].get('powerPlayPct') * 100, decimal=1)
-        pp_rank = t[0]
-        # PK
-        pk_data = sorted(pp_data, key=lambda t: t.get('penaltyKillPct'), reverse=True)
-        t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pk_data, 1)))[0]
-        pk = stats.decimal_value_to_str(t[1].get('penaltyKillPct') * 100, decimal=1)
-        pk_rank = t[0]
+        pp_data = stats.get_stats_teams_data_byProperty(property='powerPlayPct', season_id=team.get('seasonId')).get('data')
+        if pp_data:
+            t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pp_data, 1)))[0]
+            pp = stats.decimal_value_to_str(t[1].get('powerPlayPct') * 100, decimal=1)
+            pp_rank = t[0]
+            pp_str = f"{pp}% (#{pp_rank})"
+            # PK
+            pk_data = sorted(pp_data, key=lambda t: t.get('penaltyKillPct'), reverse=True)
+            t = list(filter(lambda x: x[1].get('teamFullName') == team.get('teamName').get('default'), enumerate(pk_data, 1)))[0]
+            pk = stats.decimal_value_to_str(t[1].get('penaltyKillPct') * 100, decimal=1)
+            pk_rank = t[0]
+            pk_str = f"{pk}% (#{pk_rank})"
 
         txt += "\n<b>Team Stats:</b>\n"
         n = 12
@@ -186,8 +198,8 @@ def get_team_info(teamAbbrev_teamName, info):
         txt += "Streak".ljust(n) + f" | {team.get('streakCode') + str(team.get('streakCount'))}\n"
         txt += "GoalsFor".ljust(n) + f" | {team.get('goalFor')}\n"
         txt += "GoalsAgainst".ljust(n) + f" | {team.get('goalAgainst')}\n"
-        txt += "PP%".ljust(n) + f" | {pp}% (#{pp_rank})\n"
-        txt += "PK%".ljust(n) + f" | {pk}% (#{pk_rank})\n"
+        txt += "PP%".ljust(n) + f" | {pp_str}\n"
+        txt += "PK%".ljust(n) + f" | {pk_str}\n"
         txt += "</code>\n"
 
     return txt
@@ -209,7 +221,9 @@ def get_team_stats_players(teamAbbrev):
     skaters = sorted(data.get('skaters'), key=lambda s: s.get('points'), reverse=True)
     goalies = sorted(data.get('goalies'), key=lambda s: s.get('gamesPlayed'), reverse=True)
 
-    txt = "\n<b>Statistics:</b>\n"
+    txt = f"\n<b>Season: {season_name_from_id(data.get('season'))}</b>\n"
+
+    txt += "\n<b>Statistics:</b>\n"
     txt += "<pre>"
 
     # Skaters
@@ -273,8 +287,10 @@ def get_team_schedule(teamAbbrev):
     data = get_team_schedule_data(teamAbbrev)
     games = data.get('games')
 
-    txt = f"\n<b>Schedule: ({data.get('currentMonth')})</b>\n"
-    #txt += "<pre>"
+    year_str = data.get('currentMonth')[:4]
+    month_str = calendar.month_name[int(data.get('currentMonth')[-2:])]
+
+    txt = f"\n<b>Schedule: ({month_str} {year_str})</b>\n"
 
     for g in games:
         txt += f"{g.get('gameDate')} - {schedule.get_schedule_game_text(g)}\n"
@@ -303,18 +319,20 @@ def get_standings_data():
 def get_standings_text(standingsType=None, full=False):
     data = get_standings_data()
 
+    txt = f"\n<b>Season: {season_name_from_id(data[0]['seasonId'])}</b>\n\n"
+
     match standingsType:
         case 'League':
-            txt = get_standings_league_text(data, full)
+            txt += get_standings_league_text(data, full)
 
         case 'WildCard':
-            txt = get_standings_wildcard_text(data, full)
+            txt += get_standings_wildcard_text(data, full)
 
         case 'Division':
-            txt = get_standings_division_text(data, full)
+            txt += get_standings_division_text(data, full)
 
         case _:
-            txt = get_standings_division_text(data, full)
+            txt += get_standings_division_text(data, full)
 
     return txt
 

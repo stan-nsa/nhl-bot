@@ -1,4 +1,6 @@
 from aiogram import Bot, Dispatcher, executor, types
+import logging
+
 from create_bot import dp
 from handlers import nhl, other, schedule, stats, game
 
@@ -11,4 +13,6 @@ game.register_handlers_game(dp)
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+
     executor.start_polling(dp, skip_updates=True)

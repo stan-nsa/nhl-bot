@@ -10,6 +10,12 @@ with open('config.json') as f:
 api_token_key = 'API_TOKEN'
 #api_token_key = 'API_TOKEN_TEST'
 
+proxies = {
+    'http': config['PROXY_STR'],
+    'https': config['PROXY_STR']
+}
+proxies = None
+
 bot = Bot(token=config[api_token_key])
 
 dp = Dispatcher(bot)

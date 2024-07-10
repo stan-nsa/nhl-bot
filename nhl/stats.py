@@ -19,6 +19,7 @@
 import requests
 
 from nhl import nhl
+from create_bot import proxies
 
 NHL_STATS_API_URL = "https://api.nhle.com/stats/rest/en/"
 
@@ -61,7 +62,9 @@ players_type = {
 
 # Запрос к серверу для получения данных
 def get_request_nhl_stats_api(query_str: str):
-    response = requests.get(NHL_STATS_API_URL + query_str, params={"Content-Type": "application/json"}, proxies=nhl.proxies)
+    url = NHL_STATS_API_URL + query_str
+    print(url) # For debug
+    response = requests.get(url, params={"Content-Type": "application/json"}, proxies=proxies)
     return response.json()
 
 
@@ -294,11 +297,11 @@ def get_stats_rookies_text():
 
 #-- Статистика команд -------------------------------------------------------------------------
 # Получение данных статистики команд по указанному стат.показателю
-def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular', teamFullName=''):
+def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular', teamFullName='', season_id=0):
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
-    seasonId = nhl.get_season_current()['id']
+    seasonId = season_id if season_id else nhl.get_season_current()['id']
 
     query_str = "team/summary?isAggregate=false&isGame=false"
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
@@ -331,7 +334,7 @@ def get_stats_teams_text_fromData(data):
 
 
 # Формирование теста для вывода статистики команд по указанному стат.показателю
-def get_stats_teams_byProperty_text(property: str, direction='DESC',gameType='regular'):
+def get_stats_teams_byProperty_text(property: str, direction='DESC', gameType='regular'):
     data = get_stats_teams_data_byProperty(property, direction, gameType=gameType)
 
     text = get_stats_teams_text_fromData(data)
