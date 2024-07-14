@@ -1,5 +1,5 @@
 {
   "API_TOKEN": "<token>",
-  "API_TOKEN_TEST": "token",
+  "API_TOKEN_TEST": "<token>",
   "PROXY_STR": "<proxy>"
 }
