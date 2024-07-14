@@ -78,24 +78,37 @@ def decimal_value_to_str(value, decimal=0, without_leading_zero=True):
     return s
 
 
+# Получение от сервера идентификатора текущего сезона для статистики
+def get_season_id_for_stats() -> dict:
+    query_str = 'componentSeason'
+
+    data = get_request_nhl_stats_api(query_str)
+
+    season_id = data['data'][0]['seasonId']
+
+    return season_id
+
+
 #-- Статистика вратарей ---------------------------------------------------------------------------
 # Получение данных вратарской статистики по указанному стат.показателю
 def get_stats_goalies_data_byProperty(property: str, direction='DESC', limit=10, gameType='regular'):
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
-    season_data = nhl.get_season_current()
-
-    #gamesPlayed = nhl.gameType[gameType]['min_games_played_goalies']
-    gamesPlayed = season_data['minimumRegularGamesForGoalieStatsLeaders']
-    minutesPlayed = season_data['minimumPlayoffMinutesForGoalieStatsLeaders']
-
-    seasonId = season_data['id']
+    season_id = get_season_id_for_stats()
+    season_data = nhl.get_season_data(season_id)
 
     query_str = 'goalie/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}'
+    query_str_exp = f'&cayenneExp=gameTypeId={gameTypeId} and seasonId={season_id}'
+
+    if gameType == 'regular':
+        gamesPlayed = season_data['minimumRegularGamesForGoalieStatsLeaders']
+        query_str_exp += f'&factCayenneExp=gamesPlayed>={gamesPlayed}'
+    elif gameType == 'playoff':
+        timeOnIce = season_data['minimumPlayoffMinutesForGoalieStatsLeaders'] * 60 # В секундах
+        query_str_exp += f'&factCayenneExp=timeOnIce>={timeOnIce}'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
@@ -139,19 +152,19 @@ def get_stats_skaters_data_byProperty(property: str, direction='DESC', limit=10,
     gameTypeId = nhl.gameType[gameType]['id']
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
-    seasonId = nhl.get_season_current()['id']
+    season_id = get_season_id_for_stats()
 
     query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}{players_type.get(playersType).get("exp")}'
+    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={season_id}{players_type[playersType]["exp"]}'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
     data = get_request_nhl_stats_api(query_str)
 
     data['stata'] = property
-    data['caption'] = players_type.get(playersType).get("caption")
+    data['caption'] = players_type[playersType]['caption']
 
     return data
 
@@ -188,12 +201,12 @@ def get_stats_defensemen_data_byProperty(property: str, direction='DESC', limit=
     gameTypeId = nhl.gameType[gameType]['id']
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
-    seasonId = nhl.get_season_current()['id']
+    season_id = get_season_id_for_stats()
 
     query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId} and positionCode="D"'
+    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={season_id} and positionCode="D"'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
@@ -230,12 +243,12 @@ def get_stats_defensemen_byProperty_text(property: str, direction='DESC', limit=
 
 
 # Формирование теста для вывода статистик защитников
-def get_stats_defensemen_text():
-    text = get_stats_defensemen_byProperty_text(property='points')
-    text += get_stats_defensemen_byProperty_text('goals')
-    text += get_stats_defensemen_byProperty_text('assists')
-
-    return text
+# def get_stats_defensemen_text():
+#     text = get_stats_defensemen_byProperty_text(property='points')
+#     text += get_stats_defensemen_byProperty_text('goals')
+#     text += get_stats_defensemen_byProperty_text('assists')
+#
+#     return text
 
 
 #-- Статистика новичков -------------------------------------------------------------------------
@@ -245,12 +258,12 @@ def get_stats_rookies_data_byProperty(property: str, direction='DESC', limit=10,
     gameTypeId = nhl.gameType[gameType]['id']
 
     gamesPlayed = nhl.gameType[gameType]['min_games_played_skaters']
-    seasonId = nhl.get_season_current()['id']
+    season_id = get_season_id_for_stats()
 
     query_str = 'skater/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
     query_str_limit = f'&start=0&limit={limit}'
-    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId} and isRookie=1'
+    query_str_exp = f'&factCayenneExp=gamesPlayed>={gamesPlayed}&cayenneExp=gameTypeId={gameTypeId} and seasonId={season_id} and isRookie=1'
 
     query_str += query_str_sort + query_str_limit + query_str_exp
 
@@ -287,26 +300,26 @@ def get_stats_rookies_byProperty_text(property: str, direction='DESC', limit=10,
 
 
 # Формирование теста для вывода статистик новичков
-def get_stats_rookies_text():
-    text = get_stats_rookies_byProperty_text(property='points')
-    text += get_stats_rookies_byProperty_text('goals')
-    text += get_stats_rookies_byProperty_text('assists')
-
-    return text
+# def get_stats_rookies_text():
+#     text = get_stats_rookies_byProperty_text(property='points')
+#     text += get_stats_rookies_byProperty_text('goals')
+#     text += get_stats_rookies_byProperty_text('assists')
+#
+#     return text
 
 
 #-- Статистика команд -------------------------------------------------------------------------
 # Получение данных статистики команд по указанному стат.показателю
-def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular', teamFullName='', season_id=0):
+def get_stats_teams_data_byProperty(property: str, direction='DESC', gameType='regular', teamFullName=None, season_id=None):
     #gameTypeId: 2 = regular season, 3 = playoffs
     gameTypeId = nhl.gameType[gameType]['id']
 
-    seasonId = season_id if season_id else nhl.get_season_current()['id']
+    season_id = season_id if season_id else get_season_id_for_stats()
 
-    query_str = "team/summary?isAggregate=false&isGame=false"
+    query_str = 'team/summary?isAggregate=false&isGame=false'
     query_str_sort = '&sort=[{"property":"' + property + '","direction":"' + direction + '"}]'
-    query_str_exp = f"&cayenneExp=gameTypeId={gameTypeId} and seasonId={seasonId}" + \
-                    (f" and teamFullName='{teamFullName}'" if (teamFullName != '') else "")
+    query_str_exp = f'&cayenneExp=gameTypeId={gameTypeId} and seasonId={season_id}' + \
+                    (f' and teamFullName="{teamFullName}"' if teamFullName else '')
 
     query_str += query_str_sort + query_str_exp
 

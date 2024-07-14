@@ -113,14 +113,20 @@ def get_request_nhl_api(query_str: str) -> dict:
 
 
 # Получение от сервера данных о текущем сезоне
-def get_season_current() -> dict:
-    query_str = 'season?sort=[{"property":"id","direction":"DESC"}]&limit=1'
+def get_season_data(season_id=None) -> dict:
+    query_str = 'season?'
+    query_str += f"cayenneExp=id={season_id}" if season_id else 'sort=[{"property":"id","direction":"DESC"}]&limit=1'
 
     data = stats.get_request_nhl_stats_api(query_str)
 
-    season_id = data.get('data')[0]
+    season_data = data['data'][0]
 
-    return season_id
+    return season_data
+
+
+# Получение от сервера данных о текущем сезоне
+def get_season_current() -> dict:
+    return get_season_data()
 
 
 def season_name_from_id(season_id) -> str:
@@ -155,9 +161,9 @@ def get_team_info(teamAbbrev_teamName, info) -> str:
     # Team Info/Stats
     else:
         teams = get_standings_data()
-        team = list(filter(lambda t: t.get('teamAbbrev').get('default') == teamAbbrev, teams))[0]
+        team = list(filter(lambda t: t['teamAbbrev']['default'] == teamAbbrev, teams))[0]
 
-        txt += f"\n<b>Season: {season_name_from_id(team.get('seasonId'))}</b>\n"
+        txt += f"\n<b>Season: {season_name_from_id(team['seasonId'])}</b>\n"
 
         # Rank
         txt += "\n<b>Rank:</b>\n"
