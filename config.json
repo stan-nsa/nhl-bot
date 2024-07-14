@@ -1,5 +1,5 @@
 {
-  "API_TOKEN": "5983149889:AAFoaDZD6KaQazClr_fwgrYbKhxJmD0lZCM",
-  "API_TOKEN_TEST": "5661825852:AAFU7t-PSe5smkgDKnSYORKewHfMUoD6bL8",
-  "PROXY_STR": "socks5://puser:8888@rkn-pnh.hopto.org:8888"
+  "API_TOKEN": "<token>",
+  "API_TOKEN_TEST": "token",
+  "PROXY_STR": "<proxy>"
 }
